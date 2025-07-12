@@ -121,8 +121,8 @@ module "storage" {
 
 module "dns" {
   source      = "./modules/dns"
-  external_ip = var.external_ip
   dns_name    = var.dns_name
+  external_ip = module.reverse_proxy.reverse_proxy_external_ip
 }
 
 
