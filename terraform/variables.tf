@@ -86,8 +86,3 @@ variable "dns_name" {
   description = "The name of the DNS zone"
 
 }
-
-variable "external_ip" {
-  type = string
-  description = "The IP address for the reverse proxy/load balancer"
-}
