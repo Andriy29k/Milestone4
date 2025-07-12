@@ -119,4 +119,12 @@ module "storage" {
   storage_class = var.storage_class
 }
 
+module "dns" {
+  source      = "./modules/dns"
+  external_ip = var.external_ip
+  dns_name    = var.dns_name
+  dns         = var.dns_name
+}
+
+
 
