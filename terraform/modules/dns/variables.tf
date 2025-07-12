@@ -4,6 +4,5 @@ variable "dns_name" {
 }
 
 variable "external_ip" {
-  description = "The IP address for the reverse proxy/load balancer"
-  type        = string
+  type = string
 }
