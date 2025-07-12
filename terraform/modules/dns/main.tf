@@ -11,4 +11,5 @@ resource "google_dns_record_set" "a_record" {
   ttl          = 300
   managed_zone = google_dns_managed_zone.main.name
   rrdatas      = [var.external_ip]
+  depends_on = [ google_compute_instance.reverse_proxy ]
 }
