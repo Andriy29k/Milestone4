@@ -1,0 +1,49 @@
+- name: Ensure Docker is installed
+  apt:
+    name: docker.io
+    state: present
+    update_cache: true
+  become: true
+
+- name: Ensure Docker service is running and enabled
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+  become: true
+
+- name: Stop frontend container if running
+  community.docker.docker_container:
+    name: "{{ docker_container_name }}"
+    state: stopped
+    timeout: 10
+  ignore_errors: true
+
+- name: Remove frontend container if exists
+  community.docker.docker_container:
+    name: "{{ docker_container_name }}"
+    state: absent
+  ignore_errors: true
+
+- name: Remove old frontend image if exists
+  community.docker.docker_image:
+    name: "{{ docker_image }}"
+    state: absent
+  ignore_errors: true
+
+- name: Pull latest frontend Docker image
+  community.docker.docker_image:
+    name: "{{ docker_image }}"
+    source: pull
+
+- name: Run frontend container
+  community.docker.docker_container:
+    name: "{{ docker_container_name }}"
+    image: "{{ docker_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "{{ host_port }}:{{ container_port }}"
+    env:
+      BACKEND_IP: "{{ backend_ip }}"
+    recreate: true
