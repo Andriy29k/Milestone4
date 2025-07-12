@@ -1,0 +1,9 @@
+*.war
+
+*terraform/.terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.terraform.lock.hcl
+*gcp_creds.json
+*.dump
