@@ -58,13 +58,21 @@ pipeline {
 
         stage('Destroy Infrastructure') {
             when {
-                allOf {
-                    branch 'main'
-                    expression { return params.DESTROY_INFRA ?: false }
-                }
+                branch 'main'
+                branch 'dev'
             }
             steps {
-                input message: 'Destroy infrastructure?'
+                script {
+                    def userInput = input(
+                        id: 'confirmDestroy', message: 'Do you want to DESTROY infrastructure?',
+                        parameters: [
+                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Check to confirm destruction', name: 'confirm']
+                        ]
+                    )
+                    if (userInput == false) {
+                        error "Destroy cancelled by user"
+                    }
+                }
                 dir('terraform') {
                     withCredentials([
                         file(credentialsId: 'TERRAFORM-TFVARS', variable: 'TFVARS_FILE'),
