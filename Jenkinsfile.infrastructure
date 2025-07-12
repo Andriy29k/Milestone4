@@ -1,0 +1,53 @@
+pipeline {
+    agent {label 'Linux'}
+
+    environment {
+        GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
+    }
+
+    tools {
+        terraform 'terraform-50623'
+    }
+
+    stages {
+        stage('Checkout branch') {
+            steps {
+                git branch: 'dev',
+                    url: "${env.GITHUB_URL}",
+                    credentialsId: 'github-credentials'
+            }
+        }
+
+        stage('Deploy Infrastructure') {
+            steps {
+                dir('terraform') {
+                    withCredentials([file(credentialsId: 'TERRAFORM-TFVARS', variable: 'TFVARS_FILE')]) {
+                        withCredentials([file(credentialsId: 'GCP_CREDS_JSON', variable: 'GOOGLE_CREDENTIALS')]) {
+                            sh """    
+                                terraform init
+                                terraform validate
+                                terraform plan -var 'google_credentials_file=$GOOGLE_CREDENTIALS' -var-file="$TFVARS_FILE"
+                                terraform apply -auto-approve -var 'google_credentials_file=$GOOGLE_CREDENTIALS' -var-file="$TFVARS_FILE"
+                            """
+                        }
+                    }
+                }
+            }   
+        }
+        
+        stage('Destroy Infrastructure') {
+            steps {
+                input message: 'Are you sure you want to destroy infrastructure?'
+                dir('terraform') {
+                    withCredentials([file(credentialsId: 'TERRAFORM-TFVARS', variable: 'TFVARS_FILE')]) {
+                        withCredentials([file(credentialsId: 'GCP_CREDS_JSON', variable: 'GOOGLE_CREDENTIALS')]) {
+                            sh """
+                               terraform destroy -auto-approve -var "google_credentials_file=${GOOGLE_CREDENTIALS}" -var-file="${TFVARS_FILE}"
+                            """
+                        }
+                    }
+                }
+            }   
+        } 
+    }
+}
