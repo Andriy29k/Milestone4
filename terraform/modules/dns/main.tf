@@ -2,7 +2,7 @@ resource "google_dns_managed_zone" "main" {
   name        = "class-schedule-zone"
   dns_name    = var.dns_name
   description = "DNS zone for class-schedule app"
-  visibility = "public"
+  visibility  = "public"
 }
 
 resource "google_dns_record_set" "a_record" {
@@ -10,5 +10,5 @@ resource "google_dns_record_set" "a_record" {
   type         = "A"
   ttl          = 300
   managed_zone = google_dns_managed_zone.main.name
-  rrdatas = [var.external_ip]
+  rrdatas      = [var.external_ip]
 }
