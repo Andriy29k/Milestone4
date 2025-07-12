@@ -1,0 +1,77 @@
+- name: Ensure /opt/keys exists
+  file:
+    path: /opt/keys
+    state: directory
+    mode: '0755'
+
+- name: Copy GCP service account key
+  copy:
+    src: "{{ gcp_key_src }}"
+    dest: "{{ gcp_key_dest }}"
+    mode: '0600'
+
+- name: Ensure correct permissions on GCP key
+  file:
+    path: "{{ gcp_key_dest }}"
+    owner: "{{ ansible_user | default('root') }}"
+    group: "{{ ansible_user | default('root') }}"
+    mode: '0600'
+
+- name: Copy GCP service account key
+  copy:
+    src: "{{ gcp_key_src }}"
+    dest: "{{ gcp_key_dest }}"
+    mode: '0600'
+
+- name: Download dump from GCS bucket
+  become: true
+  become_user: "{{ ansible_user }}"
+  environment:
+    GOOGLE_APPLICATION_CREDENTIALS: "{{ gcp_key_dest }}"
+  shell: |
+    gcloud auth activate-service-account --key-file="{{ gcp_key_dest }}"
+    gsutil cp "{{ gcp_bucket_path }}" "{{ local_dump_path }}"
+  args:
+    creates: "{{ local_dump_path }}"
+
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+    update_cache: true
+
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Run PostgreSQL container
+  community.docker.docker_container:
+    name: "{{ postgres_container_name }}"
+    image: "{{ postgres_image }}"
+    state: started
+    restart_policy: always
+    env:
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+- name: Wait for PostgreSQL to be ready
+  wait_for:
+    host: "127.0.0.1"
+    port: 5432
+    delay: 5
+    timeout: 60
+
+- name: Restore PostgreSQL dump
+  shell: |
+    docker exec -i {{ postgres_container_name }} bash -c "PGPASSWORD='{{ postgres_password }}' psql -U {{ postgres_user }} -d {{ postgres_db }}" < {{ local_dump_path }}
+  args:
+    executable: /bin/bash

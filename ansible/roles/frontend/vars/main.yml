@@ -1,0 +1,5 @@
+docker_image: andriy29k/class_schedule_frontend
+docker_container_name: class_schedule_frontend
+backend_ip: "{{ hostvars['backend']['ansible_host'] }}/api"
+container_port: 3000
+host_port: 3000

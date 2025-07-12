@@ -1,0 +1,2 @@
+frontend_private_ip: "{{ hostvars['frontend']['ansible_host'] }}"
+backend_private_ip: "{{ hostvars['backend']['ansible_host'] }}"

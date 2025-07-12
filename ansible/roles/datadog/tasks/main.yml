@@ -1,0 +1,19 @@
+- name: Ensure datadog.yaml with API key exists
+  become: true
+  copy:
+    dest: /etc/datadog-agent/datadog.yaml
+    content: |
+      api_key: "{{ datadog_api_key }}"
+      logs_enabled: true
+      apm_config:
+        enabled: true
+  notify: Restart datadog-agent
+  tags: datadog
+
+- name: Start and enable Datadog Agent
+  become: true
+  systemd:
+    name: datadog-agent
+    state: started
+    enabled: true
+  tags: datadog
