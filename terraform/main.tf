@@ -122,7 +122,7 @@ module "storage" {
 module "dns" {
   source      = "./modules/dns"
   dns_name    = var.dns_name
-  external_ip = google_compute_instance.reverse_proxy.network_interface[0].access_config[0].nat_ip
+  external_ip = module.reverse_proxy.reverse_proxy_external_ip
 }
 
 
