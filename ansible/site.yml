@@ -1,51 +1,9 @@
-- hosts: frontend
-  become: true
+- hosts: control-plane
+  become: yes
   roles:
-    - role: frontend
-      tags: frontend
+    - kubernetes
 
-- hosts: reverse_proxy
-  become: true
+- hosts: backend:frontend:database:reverse_proxy:monitoring
+  become: yes
   roles:
-    - role: reverse_proxy
-      tags: reverse_proxy
-
-- hosts: database
-  become: true
-  roles:
-    - role: database
-      tags: database
-
-- hosts: backend
-  become: true
-  vars:
-    database_ip: "{{ hostvars['database']['ansible_host'] }}"
-    database_name: "class_schedule"
-  roles:
-    - role: backend
-      tags: backend
-
-- hosts: all
-  become: true
-  roles:
-    - node_exporter
-
-- hosts: monitoring
-  become: true
-  roles:
-    - role: monitoring
-      tags: monitoring
-
-- name: Install and configure Datadog Agent
-  hosts: frontend, reverse_proxy, backend, database
-  become: true
-  vars:
-    datadog_api_key: "{{ datadog_api_key }}"
-    datadog_site: "datadoghq.com"
-    datadog_config:
-      logs_enabled: true
-      apm_config:
-        enabled: true
-  roles:
-    - role: datadog.dd.agent
-  tags: datadog    
+    - kubernetes
