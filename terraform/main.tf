@@ -40,7 +40,7 @@ module "bastion" {
   ssh_user            = var.ssh_user
 }
 
-# Compute instances: frontend, backend
+# Compute instances: frontend, backend, monitopring, control-plane
 module "compute" {
   source                = "./modules/compute"
   project_id            = var.project_id
