@@ -10,6 +10,7 @@ declare -A group_map=(
   ["monitoring"]="monitoring_group"
   ["reverse_proxy"]="reverse_proxy_group"
   ["database"]="database_group"
+  ["control-plane"]="control-plane_group""
 )
 
 declare -A hosts_by_group
