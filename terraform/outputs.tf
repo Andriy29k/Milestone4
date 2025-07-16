@@ -38,14 +38,6 @@ output "all_internal_ips" {
   value = module.compute.all_internal_ips
 }
 
-output "bucket_name" {
-  value = module.storage.bucket_name
-}
-
-output "bucket_url" {
-  value = module.storage.bucket_url
-}
-
 output "ssh_user" {
   value = var.ssh_user
 }
