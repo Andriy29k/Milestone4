@@ -28,19 +28,6 @@ pipeline {
         //     }
         // }
 
-        // stage('Build Frontend') {
-        //     steps {
-        //         dir('frontend') {
-        //             dir('frontend') {
-        //                 sh 'npm install'
-        //                 sh 'npm run build'
-        //                 sh 'tar -czf frontend-artifact.tar.gz build/' 
-        //                 archiveArtifacts artifacts: 'frontend-artifact.tar.gz', fingerprint: true
-        //             }
-        //         }
-        //     }
-        // }
-
         // stage('Docker images build') {
         //     steps {
         //         dir('frontend/frontend') {
@@ -59,24 +46,6 @@ pipeline {
         //                 sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
         //                 sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
         //                 sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Upload Artifacts to GCS') {
-        //     steps {
-        //         script {
-        //             def gcloud = tool 'google-cloud-sdk'
-        //             withEnv(["PATH=${gcloud}/bin:${env.PATH}"]) {
-        //                 withCredentials([file(credentialsId: 'GCP_CREDS_JSON', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
-        //                     dir('frontend/frontend') {
-        //                         sh '''
-        //                             gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
-        //                             gsutil cp frontend-artifact.tar.gz gs://class-schedule-artifacts/frontend-artifacts/
-        //                         '''
-        //                     }
-        //                 }
         //             }
         //         }
         //     }
