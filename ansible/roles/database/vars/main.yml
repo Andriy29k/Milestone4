@@ -1,9 +1,0 @@
-gcp_key_src: /home/andriy29k/Downloads/key/gcp_creds.json
-gcp_key_dest: /opt/keys/gcp_key.json
-gcp_bucket_path: gs://class-schedule-artifacts/database-artifacts/restore.dump
-local_dump_path: /tmp/restore.dump
-postgres_container_name: postgres
-postgres_image: postgres:15
-postgres_db: class_schedule
-postgres_user: database_admin
-postgres_password: admin

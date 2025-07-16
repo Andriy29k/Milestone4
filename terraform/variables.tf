@@ -21,51 +21,39 @@ variable "network_name" {
 }
 
 variable "public_subnet_cidr" {
-  type    = string
+  type = string
 }
 
 variable "private_subnet_cidr" {
-  type    = string
+  type = string
 }
 
 variable "machine_type" {
-  type    = string
+  type = string
 }
 
 variable "db_machine_type" {
-  type    = string
+  type = string
 }
 
 variable "image" {
-  type    = string
+  type = string
 }
 
 variable "size" {
-  type    = number
+  type = number
 }
 
 variable "ssh_user" {
-  type    = string
-}
-
-variable "bucket_name" {
-  type    = string
-}
-
-variable "location" {
-  type    = string 
-}
-
-variable "storage_class" {
-  type    = string  
+  type = string
 }
 
 variable "ssh_path_to_bastion" {
-  type    = string
+  type = string
 }
 
 variable "ssh_path_over_bastion" {
-  type    = string
+  type = string
 }
 
 variable "machines" {
@@ -79,4 +67,10 @@ variable "ssh_path_to_bastion_private" {
 
 variable "ssh_path_over_bastion_private" {
   type = string
+}
+
+variable "dns_name" {
+  type        = string
+  description = "The name of the DNS zone"
+
 }

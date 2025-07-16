@@ -40,7 +40,7 @@ module "bastion" {
   ssh_user            = var.ssh_user
 }
 
-# Compute instances: frontend, backend
+# Compute instances: frontend, backend, monitopring, control-plane
 module "compute" {
   source                = "./modules/compute"
   project_id            = var.project_id
@@ -109,14 +109,11 @@ module "ssh_config" {
   depends_on = [module.bastion, module.compute, module.reverse_proxy, module.database]
 }
 
-
-
-module "storage" {
-  source        = "./modules/storage"
-  project_id    = var.project_id
-  bucket_name   = var.bucket_name
-  location      = var.region
-  storage_class = var.storage_class
+module "dns" {
+  source      = "./modules/dns"
+  dns_name    = var.dns_name
+  external_ip = module.reverse_proxy.reverse_proxy_external_ip
 }
+
 
 
