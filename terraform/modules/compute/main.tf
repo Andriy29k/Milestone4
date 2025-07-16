@@ -3,6 +3,7 @@ locals {
     frontend   = "frontend"
     backend    = "backend"
     monitoring = "monitoring"
+    control-plane = "control-plane"
   }
 }
 

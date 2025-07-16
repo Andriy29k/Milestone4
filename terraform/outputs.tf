@@ -18,6 +18,10 @@ output "monitoring_internal_ip" {
   value = module.compute.monitoring_internal_ip
 }
 
+output "control_plane_internal_ip" {
+  value = module.compute.monitoring_internal_ip
+}
+
 output "database_internal_ip" {
   value = module.database.database_internal_ip
 }
@@ -32,14 +36,6 @@ output "reverse_proxy_external_ip" {
 
 output "all_internal_ips" {
   value = module.compute.all_internal_ips
-}
-
-output "bucket_name" {
-  value = module.storage.bucket_name
-}
-
-output "bucket_url" {
-  value = module.storage.bucket_url
 }
 
 output "ssh_user" {
@@ -69,4 +65,9 @@ output "debug_machines" {
 output "debug_machine_ips" {
   value = module.compute.all_internal_ips
 }
+
+output "dns_name_servers" {
+  value = module.dns.dns_name_servers
+}
+
 
