@@ -68,6 +68,10 @@ resource "google_compute_firewall" "internal-allow" {
     protocol = "tcp"
     ports    = ["0-65535"]
   }
+  allow {
+    protocol = "udp"
+    ports = ["53"]
+  }
 
   source_tags = ["frontend", "backend", "database", "reverse-proxy", "bastion", "monitoring", "control-plane"]
   target_tags = ["frontend", "backend", "database", "reverse-proxy", "bastion", "monitoring", "control-plane"]
