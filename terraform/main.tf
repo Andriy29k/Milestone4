@@ -60,6 +60,8 @@ module "reverse_proxy" {
   source                = "./modules/reverse_proxy"
   project_id            = var.project_id
   region                = var.region
+  image                 = var.image
+  machine_type          = var.machine_type
   zone                  = var.zone
   size                  = var.size
   network_name          = module.network.network_name

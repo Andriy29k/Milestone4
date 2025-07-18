@@ -5,11 +5,11 @@ variable "network_name" {}
 variable "public_subnet_name" {}
 
 variable "machine_type" {
-  default = "e2-small"
+  type = string
 }
 
 variable "image" {
-  default = "debian-cloud/debian-12"
+  type = string
 }
 
 variable "size" {
@@ -17,9 +17,9 @@ variable "size" {
 }
 
 variable "ssh_path_over_bastion" {
-  type    = string
+  type = string
 }
 
 variable "ssh_user" {
-  default = "andrii"
+  type = string
 }
