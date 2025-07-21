@@ -1,21 +1,36 @@
-- name: Render backend deployment
-  template:
-    src: templates/backend-deployment.j2
-    dest: /tmp/backend-deployment.yaml
-
-- name: Render backend service
-  template:
-    src: templates/backend-service.j2
-    dest: /tmp/backend-service.yaml
-
-- name: Apply backend deployment
-  kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
+---
+- name: Ensure kubectl is installed on control-plane
+  apt:
+    name: kubectl
     state: present
-    src: /tmp/backend-deployment.yaml
+  when: inventory_hostname in groups['control-plane_group']
 
-- name: Apply backend service
+- name: Create Docker Hub credentials secret
   kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    src: /tmp/backend-service.yaml
+    definition: "{{ lookup('template', 'regcred-secret.yaml.j2') }}"
+  vars:
+    dockerconfigjson: |
+      {
+        "auths": {
+          "https://index.docker.io/v1/": {
+            "username": "{{ dockerhub_username }}",
+            "password": "{{ dockerhub_password }}",
+            "email": "{{ dockerhub_email }}",
+            "auth": "{{ (dockerhub_username + ':' + dockerhub_password + ':' + dockerhub_email) | b64encode }}"
+          }
+        }
+      }
+  when: inventory_hostname in groups['control-plane_group']
+
+- name: Apply Backend Service
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'backend-service.yaml.j2') }}"
+  when: inventory_hostname in groups['control-plane_group']
+
+- name: Apply Backend Deployment
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'backend-deployment.yaml.j2') }}"
+  when: inventory_hostname in groups['control-plane_group']

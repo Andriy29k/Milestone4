@@ -18,13 +18,13 @@ spec:
         - name: backend
           image: {{ backend_image }}
           ports:
-            - containerPort: 8080
+            - containerPort: {{ backend_port }}
           env:
             - name: DB_ENDPOINT_TOKEN
-              value: "{{ db_endpoint }}"
+              value: {{ db_endpoint }}
             - name: DB_USERNAME_TOKEN
-              value: "{{ db_username }}"
+              value: {{ db_username }}
             - name: DB_USERPASSWORD_TOKEN
-              value: "{{ db_password }}"
+              value: {{ db_password }}
             - name: REDIS_URL
-              value: "{{ redis_url }}"
+              value: {{ redis_url }}

@@ -76,15 +76,10 @@ pipeline {
 
         stage('Ansible inventory generation') {
             steps {
-                dir('ansible/files') {
-                    sh '''
-                        chmod +x generate_inventory_from_config.sh
-                        bash generate_inventory_from_config.sh
-                    '''
-                }
-
                 dir('ansible') {
                     sh '''
+                        chmod +x files/generate_inventory_from_config.sh
+                        bash files/generate_inventory_from_config.sh
                         ansible all -i inventory.ini -m ping
                     '''
                 }
@@ -95,64 +90,39 @@ pipeline {
             steps {
                 dir('ansible') {
                     sh '''
-                        ansible-playbook -i inventory.ini site.yml --tags k3s
+                        ansible-playbook -i inventory.ini playbooks/install_k3s.yml
                     '''
                 }
             }
         }    
 
-        stage('Database deploy') {
+        stage('Deploy Services') {
             steps {
                 dir('ansible') {
-                    withCredentials([file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH')]) {
+                    withCredentials([
+                        file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH'),
+                        string(credentialsId: 'POSTGRES_USER', variable: 'POSTGRES_USER'),
+                        string(credentialsId: 'POSTGRES_PASSWORD', variable: 'POSTGRES_PASSWORD'),
+                        string(credentialsId: 'POSTGRES_DB', variable: 'POSTGRES_DB'),
+                        string(credentialsId: 'REDIS_IMAGE', variable: 'REDIS_IMAGE'),
+                        string(credentialsId: 'BACKEND_IMAGE', variable: 'BACKEND_IMAGE'),
+                        string(credentialsId: 'FRONTEND_IMAGE', variable: 'FRONTEND_IMAGE'),
+                        string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKERHUB_USERNAME'),
+                        string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKERHUB_PASSWORD'),
+                        string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKERHUB_EMAIL')
+                    ]) {
                         sh '''
-                            cat $RESTORE_FILE_PATH > restore.sql
-                            ansible-playbook -i inventory.ini site.yml --tags postgres-k3s --extra-vars "restore_sql_file=restore.sql"
+                            mkdir -p roles/postgres/files
+                            cat $RESTORE_FILE_PATH > roles/postgres/files/restore.sql
+                            ansible-playbook -i inventory.ini playbooks/deploy_postgres.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_redis.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_backend.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_frontend.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_ingress.yml
                         '''
                     }
                 }
             }
         }
-
-        stage('Redis deploy') {
-            steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i inventory.ini site.yml --tags redis-k3s
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy Backend') {
-            steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i inventory.ini site.yml --tags backend-k3s \
-                          --extra-vars "docker_password=${DOCKER_PASSWORD}"
-                    '''
-                }    
-            }
-        }
     }
 }
-
-
-        // stage('Ansible Monitoring Configuration') {
-        //     steps {
-        //         dir('ansible') {
-        //             sh '''
-        //                 ansible-playbook -i inventory.ini site.yml --tags node_exporter,monitoring                 
-
-        //             '''
-        //         }
-        //         dir('ansible') {
-        //             withCredentials([string(credentialsId: 'DATADOG_API_KEY', variable: 'DATADOG_API_KEY')]){
-        //                 sh '''
-        //                     ansible-galaxy collection install datadog.dd
-        //                     ansible-playbook -i inventory.ini site.yml --tags datadog -e datadog_api_key=$DATADOG_API_KEY
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }

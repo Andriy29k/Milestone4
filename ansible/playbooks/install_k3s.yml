@@ -1,0 +1,5 @@
+---
+- hosts: control-plane_group,workers_group
+  become: yes
+  roles:
+    - k3s

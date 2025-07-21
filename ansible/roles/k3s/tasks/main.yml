@@ -1,37 +1,11 @@
 ---
-- name: Install K3s server on control-plane
-  when: "'control-plane' in group_names"
-  become: true
-  shell: |
-    curl -sfL https://get.k3s.io | sh -s - server --write-kubeconfig-mode 644
-  args:
-    creates: /usr/local/bin/k3s
+- name: Install k3s
+  include_tasks: install_k3s.yml
 
-- name: Wait for K3s server to be ready
-  when: "'control-plane' in group_names"
-  become: true
-  shell: |
-    until sudo k3s kubectl get nodes; do sleep 5; done
-  retries: 10
-  delay: 10
-  register: k3s_ready
-  until: k3s_ready.rc == 0
+- name: Configure k3s for control-plane
+  include_tasks: configure_control_plane.yml
+  when: k3s_role == "server"
 
-- name: Read join token from control-plane
-  when: "'control-plane' in group_names"
-  become: true
-  shell: cat /var/lib/rancher/k3s/server/node-token
-  register: k3s_token
-  changed_when: false
-
-- name: Set join token fact for all hosts
-  set_fact:
-    k3s_token: "{{ hostvars[groups['control-plane'][0]].k3s_token.stdout }}"
-
-- name: Install K3s agent on worker nodes
-  when: "'control-plane' not in group_names"
-  become: true
-  shell: |
-    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars[groups['control-plane'][0]].ansible_host }}:6443 K3S_TOKEN={{ hostvars[groups['control-plane'][0]].k3s_token.stdout }} sh -s - agent
-  args:
-    creates: /usr/local/bin/k3s
+- name: Configure k3s for workers
+  include_tasks: configure_worker.yml
+  when: k3s_role == "agent"

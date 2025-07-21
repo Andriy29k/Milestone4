@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
-  namespace: {{ namespace }}
 spec:
   replicas: 1
   selector:
@@ -17,7 +16,7 @@ spec:
         node-role: database
       containers:
         - name: postgres
-          image: postgres:{{ postgres_version }}
+          image: {{ postgres_image }}
           env:
             - name: POSTGRES_USER
               value: {{ postgres_user }}
@@ -39,4 +38,4 @@ spec:
             claimName: postgres-pvc
         - name: init-sql
           configMap:
-            name: postgres-restore-config
+            name: init-sql

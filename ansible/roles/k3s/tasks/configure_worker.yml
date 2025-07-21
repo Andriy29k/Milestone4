@@ -1,0 +1,47 @@
+---
+- name: Create k3s service environment file
+  template:
+    src: k3s_env.j2
+    dest: /etc/systemd/system/k3s.service.env
+    mode: '0644'
+
+- name: Copy k3s token to worker
+  copy:
+    content: "{{ k3s_token }}"
+    dest: /var/lib/rancher/k3s/agent-token
+    mode: '0600'
+
+- name: Create k3s service file
+  copy:
+    content: |
+      [Unit]
+      Description=Lightweight Kubernetes
+      Documentation=https://k3s.io
+      After=network.target
+
+      [Service]
+      Type=notify
+      EnvironmentFile=/etc/systemd/system/k3s.service.env
+      ExecStart={{ k3s_install_dir }}/k3s {{ k3s_role }} --server {{ k3s_server_url }} --token-file /var/lib/rancher/k3s/agent-token
+      KillMode=process
+      Delegate=yes
+      LimitNOFILE=1048576
+      LimitNPROC=1048576
+      LimitCORE=1048576
+      TasksMax=infinity
+      Restart=always
+      RestartSec=5s
+
+      [Install]
+      WantedBy=multi-user.target
+    dest: /etc/systemd/system/k3s.service
+    mode: '0644'
+
+- name: Reload systemd daemon
+  command: systemctl daemon-reload
+
+- name: Enable and start k3s service
+  systemd:
+    name: k3s
+    enabled: yes
+    state: started

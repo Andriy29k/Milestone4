@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ redis_name }}
+  name: redis
 spec:
-  replicas: {{ redis_replicas | default(1) }}
+  replicas: 1
   selector:
     matchLabels:
-      app: {{ redis_name }}
+      app: redis
   template:
     metadata:
       labels:
-        app: {{ redis_name }}
+        app: redis
     spec:
       nodeSelector:
-        node-role: {{ redis_node_role | default("database") }}
+        node-role: database
       containers:
-        - name: {{ redis_name }}
-          image: {{ redis_image | default("redis:7") }}
+        - name: redis
+          image: {{ redis_image }}
           ports:
-            - containerPort: {{ redis_port | default(6379) }}
+            - containerPort: {{ redis_port }}
           volumeMounts:
             - name: redis-data
               mountPath: /data
       volumes:
         - name: redis-data
-          emptyDir: {}
+          {{ redis_storage_type }}: {}

@@ -1,11 +1,29 @@
-- name: Apply Redis Deployment
-  kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
+---
+- name: Ensure kubectl is installed on control-plane
+  apt:
+    name: kubectl
     state: present
-    definition: "{{ lookup('template', 'templates/redis-deployment.yaml.j2') }}"
+  when: inventory_hostname in groups['control-plane_group']
+
+- name: Label database node
+  kubernetes.core.k8s:
+    state: present
+    kind: Node
+    name: database
+    definition:
+      metadata:
+        labels:
+          node-role: database
+  when: inventory_hostname in groups['control-plane_group']
 
 - name: Apply Redis Service
   kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
-    definition: "{{ lookup('template', 'templates/redis-service.yaml.j2') }}"
+    definition: "{{ lookup('template', 'redis-service.yaml.j2') }}"
+  when: inventory_hostname in groups['control-plane_group']
+
+- name: Apply Redis Deployment
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'redis-deployment.yaml.j2') }}"
+  when: inventory_hostname in groups['control-plane_group']

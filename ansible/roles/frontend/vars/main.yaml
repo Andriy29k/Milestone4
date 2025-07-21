@@ -1,4 +1,0 @@
-namespace: default
-replicas: 1
-frontend_image: andriy29k/class_schedule_frontend:latest
-backend_url: "http://backend:8080"

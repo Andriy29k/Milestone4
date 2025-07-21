@@ -2,9 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: {{ namespace }}
 spec:
-  replicas: {{ replicas }}
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -21,7 +20,7 @@ spec:
         - name: frontend
           image: {{ frontend_image }}
           ports:
-            - containerPort: 3000
+            - containerPort: {{ frontend_port }}
           env:
             - name: BACKEND_IP
-              value: "{{ backend_url }}"
+              value: {{ backend_url }}
