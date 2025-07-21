@@ -5,6 +5,12 @@
     dest: /etc/systemd/system/k3s.service.env
     mode: '0644'
 
+- name: Create /var/lib/rancher/k3s directory
+  file:
+    path: /var/lib/rancher/k3s
+    state: directory
+    mode: '0755'
+
 - name: Copy k3s token to worker
   copy:
     content: "{{ k3s_token }}"
@@ -22,7 +28,7 @@
       [Service]
       Type=notify
       EnvironmentFile=/etc/systemd/system/k3s.service.env
-      ExecStart={{ k3s_install_dir }}/k3s {{ k3s_role }} --server {{ k3s_server_url }} --token-file /var/lib/rancher/k3s/agent-token
+      ExecStart={{ k3s_install_dir }}/k3s agent --server {{ k3s_server_url }} --token-file /var/lib/rancher/k3s/agent-token
       KillMode=process
       Delegate=yes
       LimitNOFILE=1048576
@@ -45,3 +51,4 @@
     name: k3s
     enabled: yes
     state: started
+    

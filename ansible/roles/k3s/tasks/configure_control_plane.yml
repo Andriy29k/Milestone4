@@ -1,9 +1,9 @@
 ---
-- name: Create k3s token file
-  copy:
-    content: "{{ k3s_token }}"
-    dest: /var/lib/rancher/k3s/server/node-token
-    mode: '0600'
+- name: Create /var/lib/rancher/k3s directory
+  file:
+    path: /var/lib/rancher/k3s
+    state: directory
+    mode: '0755'
 
 - name: Create k3s service environment file
   template:
@@ -22,7 +22,7 @@
       [Service]
       Type=notify
       EnvironmentFile=/etc/systemd/system/k3s.service.env
-      ExecStart={{ k3s_install_dir }}/k3s {{ k3s_role }} {{ k3s_server_options }}
+      ExecStart={{ k3s_install_dir }}/k3s server {{ k3s_server_options }}
       KillMode=process
       Delegate=yes
       LimitNOFILE=1048576
@@ -45,3 +45,4 @@
     name: k3s
     enabled: yes
     state: started
+    
