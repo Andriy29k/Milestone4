@@ -7,3 +7,4 @@
 *.terraform.lock.hcl
 *gcp_creds.json
 *.dump
+*.sql
