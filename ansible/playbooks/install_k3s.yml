@@ -14,16 +14,16 @@
   tasks:
     - name: Wait for token
       wait_for:
-        path: /var/lib/rancher/k3s/server-node-token
+        path: /var/lib/rancher/k3s/server/token
         state: present
       delegate_to: "{{ groups['control_plane_group'][0] }}"
       delay: 5
-      timeout: 30
+      timeout: 60
 
     - name: Retrieve k3s token
       slurp:
-        src: /var/lib/rancher/k3s/server-node-token
-      register: k3s_token_file
+        src: /var/lib/rancher/k3s/server/token
+        register: k3s_token_file
 
     - name: Set k3s_token fact
       set_fact:
