@@ -5,6 +5,8 @@ pipeline {
         GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
         BACKEND_IMAGE_NAME = 'class_schedule_backend'
         IMAGE_TAG = 'latest'
+        RESTORE_SQL = credentials('RESTORE_DUMP')
+        DOCKER_PASSWORD = credentials('dockerhub-password') 
     }
 
     tools {
@@ -73,7 +75,7 @@ pipeline {
         //     }
         // }
 
-        stage('Ansible Backend Configuration') {
+        stage('Ansible inventory generation') {
             steps {
                 dir('ansible/files') {
                     sh '''
@@ -82,29 +84,42 @@ pipeline {
                     '''
                 }
 
-                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
-                    dir('ansible') {
-                        sh '''
-                            ansible all -i inventory.ini -m ping
-                        '''
-                        
-                        withCredentials([string(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE')]) {
-                            dir('ansible') {
-                                  sh '''
-                                    ansible-playbook site.yml --extra-vars "sql_file=$RESTORE_FILE"
-                                '''
-                            }
-                        }
-
-                        sh '''
-                            ansible-playbook -i inventory.ini deploy_redis.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
-                        '''
-
-                        sh '''
-                            ansible-playbook -i inventory.ini deploy_backend.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
-                        '''
-                    }
+                dir('ansible') {
+                    sh '''
+                        ansible all -i inventory.ini -m ping
+                    '''
                 }
+            }
+        }    
+
+        stage('Database deploy') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                        echo "$RESTORE_SQL" > restore.sql
+                        ansible-playbook -i inventory.ini deploy_database.yml \
+                          --extra-vars "restore_sql_file=restore.sql"
+                    '''
+                }
+            }
+        }
+
+        stage('Redis deploy') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i inventory.ini deploy_redis.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy Backend') {
+            steps {
+                sh '''
+                    ansible-playbook -i inventory.ini deploy_backend.yml \
+                      --extra-vars "docker_password=${DOCKER_PASSWORD}"
+                '''
             }
         }
     }
