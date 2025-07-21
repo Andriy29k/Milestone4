@@ -65,7 +65,7 @@
 - name: Deploy Postgres DB
   hosts: control-plane_group
   gather_facts: false
-  tags: ['postgres']
+  tags: ['postgres-k3s']
   tasks:
     - name: Apply Postgres PVC
       kubernetes.core.k8s:
@@ -94,7 +94,7 @@
 - name: Deploy Redis
   hosts: control-plane_group
   gather_facts: false
-  tags: ['redis']
+  tags: ['redis-k3s']
   tasks:
     - name: Apply Redis Deployment
       kubernetes.core.k8s:
@@ -111,7 +111,7 @@
 - name: Deploy Backend
   hosts: control-plane_group
   gather_facts: false
-  tags: ['backend']
+  tags: ['backend-k3s']
   tasks:
     - name: Apply Backend Deployment
       kubernetes.core.k8s:
@@ -128,7 +128,7 @@
 - name: Deploy Frontend
   hosts: control-plane_group
   gather_facts: false
-  tags: ['frontend']
+  tags: ['frontend-k3s']
   tasks:
     - name: Apply Frontend Deployment
       kubernetes.core.k8s:
@@ -145,7 +145,7 @@
 - name: Deploy Reverse Proxy Ingress
   hosts: control-plane_group
   gather_facts: false
-  tags: ['reverse-proxy']
+  tags: ['reverse-proxy-k3s']
   tasks:
     - name: Apply Ingress manifest
       kubernetes.core.k8s:
