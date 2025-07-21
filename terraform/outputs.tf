@@ -19,7 +19,7 @@ output "monitoring_internal_ip" {
 }
 
 output "control_plane_internal_ip" {
-  value = module.compute.monitoring_internal_ip
+  value = module.compute.control_plane_internal_ip
 }
 
 output "database_internal_ip" {
