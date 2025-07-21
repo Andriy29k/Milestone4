@@ -90,9 +90,9 @@ pipeline {
                         
                         withCredentials([string(credentialsId: 'restore_sql_secret', variable: 'RESTORE_SQL')]) {
                             dir('ansible') {
-                                sh '''
-                                    ansible-playbook -i inventory.ini site.yml --extra-vars "restore_sql='''"$RESTORE_SQL"'''"
-                                '''
+                                sh """
+                                    ansible-playbook -i inventory.ini site.yml --extra-vars 'restore_sql="${RESTORE_SQL}"'
+                                """
                             }
                         }
 
