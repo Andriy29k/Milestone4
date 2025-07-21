@@ -69,16 +69,13 @@ fi
 
 for group in "${!hosts_by_group[@]}"; do
   echo "[$group]" >> "$output"
-  echo -e "${hosts_by_group[$group]}" >> "$output"
+  echo -e "${hosts_by_group[$group]}" | sed '/^[[:space:]]*$/d' >> "$output"
   echo "" >> "$output"
 done
 
 workers_groups=(backend_group frontend_group monitoring_group reverse_proxy_group database_group)
 echo "[workers_group]" >> "$output"
 for wg in "${workers_groups[@]}"; do
-  while read -r line; do
-    host_name=$(echo "$line" | awk '{print $1}')
-    echo "$host_name" >> "$output"
-  done <<< "${hosts_by_group[$wg]}"
+  echo "${hosts_by_group[$wg]}" | grep -o '^[a-zA-Z0-9_-]\+' | sort -u >> "$output"
 done
 echo "" >> "$output"
