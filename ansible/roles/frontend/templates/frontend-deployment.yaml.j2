@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{ namespace }}
+spec:
+  replicas: {{ replicas }}
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      nodeSelector:
+        node-role: frontend
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: frontend
+          image: {{ frontend_image }}
+          ports:
+            - containerPort: 3000
+          env:
+            - name: BACKEND_IP
+              value: "{{ backend_url }}"

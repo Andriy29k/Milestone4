@@ -1,0 +1,11 @@
+- name: Apply Redis Deployment
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('template', 'templates/redis-deployment.yaml.j2') }}"
+
+- name: Apply Redis Service
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition: "{{ lookup('template', 'templates/redis-service.yaml.j2') }}"

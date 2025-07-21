@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ redis_name }}
+spec:
+  selector:
+    app: {{ redis_name }}
+  ports:
+    - port: {{ redis_port | default(6379) }}
+      targetPort: {{ redis_port | default(6379) }}

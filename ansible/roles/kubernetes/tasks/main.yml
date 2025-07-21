@@ -1,7 +1,0 @@
-- name: Install K3s Master node (control-plane)
-  when: "'control-plane' in group_names"
-  import_tasks: install_master.yml
-
-- name: Install K3s Worker node (agent)
-  when: "'backend' in group_names or 'frontend' in group_names or 'database' in group_names or 'reverse_proxy' in group_names or 'monitoring' in group_names"
-  import_tasks: install_worker.yml

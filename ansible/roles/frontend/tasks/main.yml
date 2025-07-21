@@ -1,0 +1,11 @@
+- name: Apply Frontend Deployment
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'frontend-deployment.yaml.j2') | from_yaml }}"
+
+- name: Apply Frontend Service
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'frontend-service.yaml.j2') | from_yaml }}"

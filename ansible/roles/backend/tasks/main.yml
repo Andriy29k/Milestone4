@@ -1,0 +1,21 @@
+- name: Render backend deployment
+  template:
+    src: templates/backend-deployment.j2
+    dest: /tmp/backend-deployment.yaml
+
+- name: Render backend service
+  template:
+    src: templates/backend-service.j2
+    dest: /tmp/backend-service.yaml
+
+- name: Apply backend deployment
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    src: /tmp/backend-deployment.yaml
+
+- name: Apply backend service
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    src: /tmp/backend-service.yaml

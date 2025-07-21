@@ -1,0 +1,27 @@
+- name: Load restore.sql content
+  set_fact:
+    restore_sql: "{{ lookup('file', 'roles/database/files/restore.sql') }}"
+
+- name: Apply PostgreSQL PVC
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'postgres-pvc.yaml.j2') | from_yaml }}"
+
+- name: Apply PostgreSQL ConfigMap
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'postgres-configmap.yaml.j2') | from_yaml }}"
+
+- name: Apply PostgreSQL Deployment
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'postgres-deployment.yaml.j2') | from_yaml }}"
+
+- name: Apply PostgreSQL Service
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'postgres-service.yaml.j2') | from_yaml }}"

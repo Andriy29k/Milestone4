@@ -1,0 +1,8 @@
+namespace: default
+storage_class: local-path
+storage_size: 1Gi
+postgres_version: "15"
+postgres_user: "admin"
+postgres_password: "admin"
+postgres_db: "class_schedule"
+kubeconfig_path: /etc/rancher/k3s/k3s.yaml

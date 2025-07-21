@@ -1,0 +1,29 @@
+- name: Install k3s on control-plane
+  shell: curl -sfL https://get.k3s.io | sh -s - server --write-kubeconfig-mode 644
+  when: inventory_hostname == 'control-plane'
+
+- name: Get join token from control-plane
+  shell: cat /var/lib/rancher/k3s/server/node-token
+  register: k3s_token
+  delegate_to: control-plane
+  run_once: true
+
+- name: Install k3s agent on worker nodes
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['control-plane'].ansible_host }}:6443 K3S_TOKEN={{ hostvars['control-plane'].k3s_token.stdout }} sh -s - agent
+  when: inventory_hostname != 'control-plane'
+
+- name: Create Kubernetes docker-registry secret regcred
+  kubernetes.core.k8s:
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: regcred
+        namespace: default
+      type: kubernetes.io/dockerconfigjson
+      data:
+        .dockerconfigjson: "{{ dockerconfigjson_b64 }}"
+

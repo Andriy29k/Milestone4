@@ -1,0 +1,5 @@
+backend_image: "andriy29k/class_schedule_backend:latest"
+db_endpoint: "jdbc:postgresql://postgres:5432/class_schedule"
+db_username: "admin"
+db_password: "admin"
+redis_url: "redis://redis:6379"

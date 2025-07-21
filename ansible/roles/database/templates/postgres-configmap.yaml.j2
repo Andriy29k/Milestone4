@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-sql
+  namespace: {{ namespace }}
+data:
+  restore.sql: |
+{% for line in restore_sql.splitlines() %}
+    {{ line }}
+{% endfor %}

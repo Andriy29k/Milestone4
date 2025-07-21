@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: backend
+          image: {{ backend_image }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_ENDPOINT_TOKEN
+              value: "{{ db_endpoint }}"
+            - name: DB_USERNAME_TOKEN
+              value: "{{ db_username }}"
+            - name: DB_USERPASSWORD_TOKEN
+              value: "{{ db_password }}"
+            - name: REDIS_URL
+              value: "{{ redis_url }}"

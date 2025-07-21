@@ -1,9 +1,153 @@
-- hosts: control-plane
-  become: yes
-  roles:
-    - kubernetes
+---
+- name: Setup K3s Control Plane
+  hosts: control-plane_group
+  become: true
+  tasks:
+    - name: Install K3s on control plane
+      import_role:
+        name: k3s_install_control_plane
 
-- hosts: backend:frontend:database:reverse_proxy:monitoring
-  become: yes
-  roles:
-    - kubernetes
+- name: Join worker nodes to cluster
+  hosts: 
+    - backend_group
+    - frontend_group
+    - database_group
+    - reverse_proxy_group
+    - monitoring_group
+  become: true
+  tasks:
+    - name: Join node to K3s cluster
+      import_role:
+        name: k3s_join_node
+
+- name: Label nodes
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Label nodes by groups
+      shell: |
+        kubectl label node {{ item }} node-role={{ item_role }} --overwrite
+      vars:
+        node_roles:
+          backend_group: backend
+          frontend_group: frontend
+          database_group: database
+          reverse_proxy_group: reverse-proxy
+          monitoring_group: monitoring
+      loop: "{{ groups['backend_group'] + groups['frontend_group'] + groups['database_group'] + groups['reverse_proxy_group'] + groups['monitoring_group'] }}"
+      loop_control:
+        loop_var: item
+      vars_prompt: []
+      when: "'{{ item }}' in groups['backend_group']"
+      
+- name: Create Docker Registry Secret regcred
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Create regcred secret in default namespace
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: regcred
+            namespace: default
+          type: kubernetes.io/dockerconfigjson
+          data:
+            .dockerconfigjson: "{{ lookup('file', 'files/.dockerconfigjson') | b64encode }}"
+
+- name: Render init-sql ConfigMap from template
+  template:
+    src: postgres-configmap.yaml.j2
+    dest: /tmp/postgres-configmap.yaml
+  vars:
+    namespace: default
+    restore_sql: "{{ restore_sql }}"
+
+- name: Deploy Postgres DB
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Apply Postgres PVC
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/postgres-pvc.yaml
+
+    - name: Apply Postgres ConfigMap (init sql)
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/postgres-configmap.yaml
+
+    - name: Apply Postgres Deployment
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/postgres-deployment.yaml
+
+    - name: Apply Postgres Service
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/postgres-service.yaml
+
+- name: Deploy Redis
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Apply Redis Deployment
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/redis-deployment.yaml
+
+    - name: Apply Redis Service
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/redis-service.yaml
+
+- name: Deploy Backend
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Apply Backend Deployment
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/backend-deployment.yaml
+
+    - name: Apply Backend Service
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/backend-service.yaml
+
+- name: Deploy Frontend
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Apply Frontend Deployment
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/frontend-deployment.yaml
+
+    - name: Apply Frontend Service
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/frontend-service.yaml
+
+- name: Deploy Reverse Proxy Ingress
+  hosts: control-plane_group
+  gather_facts: false
+  tasks:
+    - name: Apply Ingress manifest
+      kubernetes.core.k8s:
+        kubeconfig: /etc/rancher/k3s/k3s.yaml
+        state: present
+        src: files/reverse-proxy-ingress.yaml
