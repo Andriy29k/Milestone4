@@ -107,7 +107,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH')]) {
                         sh '''
                             cat $RESTORE_FILE_PATH > restore.sql
-                            ansible-playbook -i inventory.ini site.yml --tags postgres --extra-vars "restore_sql_file=restore.sql"
+                            ansible-playbook -i inventory.ini site.yml --tags postgres-k3s --extra-vars "restore_sql_file=restore.sql"
                         '''
                     }
                 }
@@ -118,7 +118,7 @@ pipeline {
             steps {
                 dir('ansible') {
                     sh '''
-                        ansible-playbook -i inventory.ini site.yml --tags redis
+                        ansible-playbook -i inventory.ini site.yml --tags redis-k3s
                     '''
                 }
             }
@@ -128,7 +128,7 @@ pipeline {
             steps {
                 dir('ansible') {
                     sh '''
-                        ansible-playbook -i inventory.ini site.yml --tags backend \
+                        ansible-playbook -i inventory.ini site.yml --tags backend-k3s \
                           --extra-vars "docker_password=${DOCKER_PASSWORD}"
                     '''
                 }    
