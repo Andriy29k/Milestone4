@@ -8,7 +8,7 @@ declare -A group_map=(
   ["backend"]="backend_group"
   ["frontend"]="frontend_group"
   ["monitoring"]="monitoring_group"
-  ["control_plane"]="control_plane_group"
+  ["control-plane"]="control_plane_group"  # Зміна тут: control-plane замість control_plane
   ["reverse_proxy"]="reverse_proxy_group"
   ["database"]="database_group"
 )
