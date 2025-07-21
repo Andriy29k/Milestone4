@@ -74,34 +74,37 @@ pipeline {
         // }
 
         stage('Ansible Backend Configuration') {
-    steps {
-        dir('ansible/files') {
-            sh '''
-                chmod +x generate_inventory_from_config.sh
-                bash generate_inventory_from_config.sh
-            '''
-        }
+            steps {
+                dir('ansible/files') {
+                    sh '''
+                        chmod +x generate_inventory_from_config.sh
+                        bash generate_inventory_from_config.sh
+                    '''
+                }
 
-        withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
-            dir('ansible') {
-                sh '''
-                    ansible all -i inventory.ini -m ping
-                '''
-                 withCredentials([string(credentialsId: 'restore_sql_secret', variable: 'RESTORE_SQL')]) {
+                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
                     dir('ansible') {
                         sh '''
-                            ansible-playbook -i inventory.ini site.yml --extra-vars "restore_sql='''"$RESTORE_SQL"'''"
+                            ansible all -i inventory.ini -m ping
+                        '''
+                        
+                        withCredentials([string(credentialsId: 'restore_sql_secret', variable: 'RESTORE_SQL')]) {
+                            dir('ansible') {
+                                sh '''
+                                    ansible-playbook -i inventory.ini site.yml --extra-vars "restore_sql='''"$RESTORE_SQL"'''"
+                                '''
+                            }
+                        }
+
+                        sh '''
+                            ansible-playbook -i inventory.ini deploy_redis.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
+                        '''
+
+                        sh '''
+                            ansible-playbook -i inventory.ini deploy_backend.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
                         '''
                     }
                 }
-
-                sh '''
-                    ansible-playbook -i inventory.ini deploy_redis.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
-                '''
-
-                sh '''
-                    ansible-playbook -i inventory.ini deploy_backend.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
-                '''
             }
         }
     }
@@ -126,5 +129,3 @@ pipeline {
         //         }
         //     }
         // }
-    }
-}
