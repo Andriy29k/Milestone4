@@ -75,11 +75,11 @@ pipeline {
 
         stage('Ansible inventory generation') {
             steps {
-                dir('ansible') {
+                dir('ansible/files') {
                     sh '''
-                        chmod +x files/generate_inventory_from_config.sh
-                        bash files/generate_inventory_from_config.sh
-                        ansible all -i inventory.ini -m ping
+                        chmod +x generate_inventory_from_config.sh
+                        bash generate_inventory_from_config.sh
+                        cd .. | ansible all -i inventory.ini -m ping
                     '''
                 }
             }
