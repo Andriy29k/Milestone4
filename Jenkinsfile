@@ -1,86 +1,125 @@
 pipeline {
-    agent { label 'Linux' }
+    agent {label 'Linux'}
 
     environment {
-        GITHUB_URL = "https://github.com/Andriy29k/intern_project01.git"
+        GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
+        BACKEND_IMAGE_NAME = 'class_schedule_backend'
+        IMAGE_TAG = 'latest'
+        DOCKER_PASSWORD = credentials('dockerhub-password') 
     }
 
     tools {
-        terraform 'terraform-50623'
+        gradle 'gradle-6.8'
+        jdk 'jdk-11'
     }
 
     stages {
-        stage('Init') {
+        stage('Checkout branch') {
             steps {
-                script {
-                    echo "Building branch: ${env.BRANCH_NAME}"
+                git branch: 'dev',
+                    url: "${env.GITHUB_URL}",
+                    credentialsId: 'github-credentials'
+            }
+        }
+        // stage('Build Backend') {
+        //     steps {
+        //         dir('backend') {
+        //             dir('backend'){
+        //                 sh 'gradle clean build -x test'
+        //                 sh 'ls -l build/libs'
+        //             }
+        //         }
+        //     }
+        // }
+
+        // stage('Backend Tests') {
+        //     steps {
+        //         dir('backend') {
+        //             dir('backend') {
+        //                 sh 'gradle test'
+        //             }
+        //         }
+        //     }
+        // }
+
+        // stage('Sonar Scanning') {
+        //     steps {
+        //         withSonarQubeEnv('SonarQube') {
+        //             sh 'sonar-scanner -Dproject.settings=./sonar/backend-sonar.properties'
+        //         }
+        //     }
+        // }
+
+        // stage('Backend image build') {
+        //     steps {
+        //         script {
+        //             sh '''
+        //                 rm -rf backend/ROOT
+        //                 mkdir -p backend/ROOT
+        //                 unzip -q backend/backend/build/libs/*.war -d backend/ROOT
+        //                 ls -l backend/ROOT/WEB-INF/classes/
+        //             '''
+        //             withCredentials([usernamePassword(
+        //                 credentialsId: 'DOCKERHUB_CREDENTIALS',
+        //                 usernameVariable: 'DOCKERHUB_USERNAME',
+        //                 passwordVariable: 'DOCKERHUB_PASSWORD'
+        //             )]) {
+        //                 sh """
+        //                     echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+        //                     docker build -t $DOCKERHUB_USERNAME/$BACKEND_IMAGE_NAME:$IMAGE_TAG ./backend
+        //                     docker push $DOCKERHUB_USERNAME/$BACKEND_IMAGE_NAME:$IMAGE_TAG
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Ansible inventory generation') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                        chmod +x files/generate_inventory_from_config.sh
+                        bash files/generate_inventory_from_config.sh
+                        ansible all -i inventory.ini -m ping
+                    '''
                 }
             }
         }
 
-        stage('Deploy Infrastructure') {
-            when {
-                anyOf {
-                    branch 'dev'
-                    branch 'main'
-                }
-            }
+        stage('K3S Setup') {
             steps {
-                dir('terraform') {
-                    withCredentials([
-                        file(credentialsId: 'TERRAFORM-TFVARS', variable: 'TFVARS_FILE'),
-                        file(credentialsId: 'GCP_CREDS_JSON', variable: 'GOOGLE_CREDENTIALS')
-                    ]) {
-                        script {
-                            sh 'terraform init'
-                            sh 'terraform validate'
-                            def planExitCode = sh(
-                                script: """
-                                    terraform plan -detailed-exitcode -var "google_credentials_file=$GOOGLE_CREDENTIALS" -var-file="$TFVARS_FILE" > tfplan.log
-                                """,
-                                returnStatus: true
-                            )
-
-                            if (planExitCode == 0) {
-                                echo "Infrastructure is up-to-date. Skipping stage..."
-                            } else if (planExitCode == 2) {
-                                sh """
-                                    terraform apply -auto-approve -var "google_credentials_file=$GOOGLE_CREDENTIALS" -var-file="$TFVARS_FILE"
-                                """
-                            } else {
-                                error "Terraform plan failed"
-                            }
-                        }
-                    }
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i inventory.ini playbooks/install_k3s.yml
+                    '''
                 }
             }
-        }
+        }    
 
-        stage('Destroy Infrastructure') {
-            when {
-                branch 'main'
-                branch 'dev'
-            }
+        stage('Deploy Services') {
             steps {
-                script {
-                    def userInput = input(
-                        id: 'confirmDestroy', message: 'Do you want to DESTROY infrastructure?',
-                        parameters: [
-                            [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Check to confirm destruction', name: 'confirm']
-                        ]
-                    )
-                    if (userInput == false) {
-                        error "Destroy cancelled by user"
-                    }
-                }
-                dir('terraform') {
+                dir('ansible') {
                     withCredentials([
-                        file(credentialsId: 'TERRAFORM-TFVARS', variable: 'TFVARS_FILE'),
-                        file(credentialsId: 'GCP_CREDS_JSON', variable: 'GOOGLE_CREDENTIALS')
+                        file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH'),
+                        string(credentialsId: 'POSTGRES_USER', variable: 'POSTGRES_USER'),
+                        string(credentialsId: 'POSTGRES_PASSWORD', variable: 'POSTGRES_PASSWORD'),
+                        string(credentialsId: 'POSTGRES_DB', variable: 'POSTGRES_DB'),
+                        string(credentialsId: 'REDIS_IMAGE', variable: 'REDIS_IMAGE'),
+                        string(credentialsId: 'BACKEND_IMAGE', variable: 'BACKEND_IMAGE'),
+                        string(credentialsId: 'FRONTEND_IMAGE', variable: 'FRONTEND_IMAGE'),
+                        string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKERHUB_USERNAME'),
+                        string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKERHUB_PASSWORD'),
+                        string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKERHUB_EMAIL')
                     ]) {
-                        sh """
-                            terraform destroy -auto-approve -var "google_credentials_file=${GOOGLE_CREDENTIALS}" -var-file="${TFVARS_FILE}"
-                        """
+                        sh '''
+                            mkdir -p roles/postgres/files
+                            cat $RESTORE_FILE_PATH > roles/postgres/files/restore.sql
+                            ansible-playbook -i inventory.ini playbooks/deploy_postgres.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_redis.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_backend.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_frontend.yml
+                            ansible-playbook -i inventory.ini playbooks/deploy_ingress.yml
+                        '''
                     }
                 }
             }
