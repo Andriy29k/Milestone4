@@ -1,0 +1,70 @@
+pipeline {
+    agent {label 'Linux'}
+
+    environment {
+        GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
+        FRONTEND_IMAGE_NAME = 'class_schedule_frontend'
+        IMAGE_TAG = 'latest'
+    }
+
+    tools {
+        nodejs 'nodejs-18'
+    }
+
+    stages {
+        stage('Checkout branch') {
+            steps {
+                git branch: 'dev',
+                    url: "${env.GITHUB_URL}",
+                    credentialsId: 'github-credentials'
+            }
+        }
+        
+        // stage('Sonar Scanning') {
+        //     steps {
+        //         withSonarQubeEnv('SonarQube') {
+        //             sh 'sonar-scanner -Dproject.settings=./sonar/frontend-sonar.properties'
+        //         }
+        //     }
+        // }
+
+        // stage('Docker images build') {
+        //     steps {
+        //         dir('frontend/frontend') {
+        //            sh '''
+        //                 mkdir -p ../build
+        //                 tar -xzf frontend-artifact.tar.gz -C ../build/
+        //                 rm -rf build
+        //             '''
+        //         }
+        //         withCredentials([usernamePassword(
+        //                 credentialsId: 'DOCKERHUB_CREDENTIALS', 
+        //                 usernameVariable: 'DOCKERHUB_USERNAME', 
+        //                 passwordVariable: 'DOCKERHUB_PASSWORD'
+        //         )]) {
+        //             dir('frontend') {
+        //                 sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
+        //                 sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
+        //                 sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
+        //             }
+        //         }
+        //     }
+        // }
+        
+        stage('Ansible configuration [frontend, reverse_proxy]') {
+            steps {
+                dir('ansible/files') {
+                    sh '''
+                        chmod +x generate_inventory_from_config.sh
+                        ./generate_inventory_from_config.sh
+                    '''
+                }
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i inventory.ini deploy_frontend.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
+                    '''
+                }
+            }
+        }
+    }
+}
