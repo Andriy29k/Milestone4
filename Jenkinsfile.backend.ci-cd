@@ -116,10 +116,12 @@ pipeline {
 
         stage('Deploy Backend') {
             steps {
-                sh '''
-                    ansible-playbook -i inventory.ini site.yml --tags backend \
-                      --extra-vars "docker_password=${DOCKER_PASSWORD}"
-                '''
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i inventory.ini site.yml --tags backend \
+                          --extra-vars "docker_password=${DOCKER_PASSWORD}"
+                    '''
+                }    
             }
         }
     }
