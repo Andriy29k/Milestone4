@@ -13,7 +13,16 @@
     curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['control-plane'].ansible_host }}:6443 K3S_TOKEN={{ hostvars['control-plane'].k3s_token.stdout }} sh -s - agent
   when: inventory_hostname != 'control-plane'
 
-- name: Create Kubernetes docker-registry secret regcred
+- name: Generate .dockerconfigjson for regcred
+  template:
+    src: dockerconfigjson.j2
+    dest: /tmp/.dockerconfigjson
+  vars:
+    docker_username: "{{ docker_username }}"
+    docker_password: "{{ docker_password }}"
+    docker_email: "{{ docker_email }}"
+
+- name: Create Kubernetes secret regcred
   kubernetes.core.k8s:
     kubeconfig: /etc/rancher/k3s/k3s.yaml
     state: present
@@ -25,5 +34,5 @@
         namespace: default
       type: kubernetes.io/dockerconfigjson
       data:
-        .dockerconfigjson: "{{ dockerconfigjson_b64 }}"
+        .dockerconfigjson: "{{ lookup('file', '/tmp/.dockerconfigjson') | b64encode }}"
 
