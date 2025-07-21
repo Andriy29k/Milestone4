@@ -1,44 +1,19 @@
 ---
-- name: Install and configure k3s control plane
-  hosts: control_plane_group
-  become: true
-  vars:
-    k3s_role: "server"
-    k3s_server_options: "--cluster-init"
-  roles:
-    - k3s
-
-- name: Wait for token
-  wait_for:
-    path: /var/lib/rancher/k3s/server-node-token
+- name: Install prerequisites
+  apt:
+    name:
+      - curl
+      - iptables
     state: present
-  delegate_to: "{{ groups['control_plane_group'][0] }}"
-  delay: 5
-  timeout: 30
+    update_cache: yes
 
-- name: Fetch k3s token from control plane
-  hosts: control_plane_group
-  become: true
-  tasks:
-    - name: Retrieve k3s token
-      slurp:
-        src: /var/lib/rancher/k3s/server-node-token
-      register: k3s_token_file
+- name: Download k3s binary
+  get_url:
+    url: "https://github.com/k3s-io/k3s/releases/download/{{ k3s_version }}/k3s"
+    dest: "{{ k3s_install_dir }}/k3s"
+    mode: '0755'
 
-    - name: Set k3s_token fact
-      set_fact:
-        k3s_token: "{{ k3s_token_file.content | b64decode | trim }}"
-
-    - name: Debug k3s token
-      debug:
-        msg: "K3S Token: {{ k3s_token }}"
-
-- name: Install and configure k3s workers
-  hosts: workers_group
-  become: true
-  vars:
-    k3s_role: "agent"
-    k3s_server_url: "https://{{ hostvars[groups['control_plane_group'][0]]['ansible_host'] }}:6443"
-    k3s_token: "{{ hostvars[groups['control_plane_group'][0]]['k3s_token'] }}"
-  roles:
-    - k3s
+- name: Ensure k3s binary is executable
+  file:
+    path: "{{ k3s_install_dir }}/k3s"
+    mode: '0755'
