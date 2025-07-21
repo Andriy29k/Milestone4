@@ -5,7 +5,6 @@ pipeline {
         GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
         BACKEND_IMAGE_NAME = 'class_schedule_backend'
         IMAGE_TAG = 'latest'
-        RESTORE_SQL = credentials('RESTORE_DUMP')
         DOCKER_PASSWORD = credentials('dockerhub-password') 
     }
 
@@ -95,11 +94,12 @@ pipeline {
         stage('Database deploy') {
             steps {
                 dir('ansible') {
-                    sh '''
-                        echo "$RESTORE_SQL" > restore.sql
-                        ansible-playbook -i inventory.ini deploy_database.yml \
-                          --extra-vars "restore_sql_file=restore.sql"
-                    '''
+                    withCredentials([file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH')]) {
+                        sh '''
+                            cat $RESTORE_FILE_PATH > restore.sql
+                            ansible-playbook -i inventory.ini deploy_database.yml --extra-vars "restore_sql_file=restore.sql"
+                        '''
+                    }
                 }
             }
         }
