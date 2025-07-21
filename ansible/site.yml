@@ -58,14 +58,6 @@
           data:
             .dockerconfigjson: "{{ lookup('file', 'files/.dockerconfigjson') | b64encode }}"
 
-- name: Render init-sql ConfigMap from template
-  template:
-    src: postgres-configmap.yaml.j2
-    dest: /tmp/postgres-configmap.yaml
-  vars:
-    namespace: default
-    restore_sql: "{{ restore_sql }}"
-
 - name: Deploy Postgres DB
   hosts: control-plane_group
   gather_facts: false
