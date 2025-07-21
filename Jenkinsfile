@@ -2,10 +2,9 @@ pipeline {
     agent {label 'Linux'}
 
     environment {
-        GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
+        GITHUB_URL="https://github.com/Andriy29k/Milestone4.git"
         BACKEND_IMAGE_NAME = 'class_schedule_backend'
         IMAGE_TAG = 'latest'
-        DOCKER_PASSWORD = credentials('dockerhub-password') 
     }
 
     tools {
