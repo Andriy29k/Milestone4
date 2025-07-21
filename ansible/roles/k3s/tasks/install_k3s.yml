@@ -14,7 +14,7 @@
   tasks:
     - name: Retrieve k3s token
       slurp:
-        src: /var/lib/rancher/k3s/server/node-token
+        src: /var/lib/rancher/k3s/server-node-token
       register: k3s_token_file
 
     - name: Set k3s_token fact
