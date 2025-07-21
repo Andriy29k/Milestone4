@@ -2,12 +2,14 @@
 - name: Setup K3s Control Plane
   hosts: control-plane_group
   become: true
+  tags: ['k3s', 'control-plane']
   tasks:
     - name: Install K3s on control plane
       import_role:
         name: k3s_install_control_plane
 
 - name: Join worker nodes to cluster
+  tags: ['workers']
   hosts: 
     - backend_group
     - frontend_group
@@ -23,6 +25,7 @@
 - name: Label nodes
   hosts: control-plane_group
   gather_facts: false
+  tags: ['k3s', 'control-plane']
   tasks:
     - name: Label nodes by groups
       shell: |
@@ -43,6 +46,7 @@
 - name: Create Docker Registry Secret regcred
   hosts: control-plane_group
   gather_facts: false
+  tags: ['k3s', 'control-plane']
   tasks:
     - name: Create regcred secret in default namespace
       kubernetes.core.k8s:
@@ -61,6 +65,7 @@
 - name: Deploy Postgres DB
   hosts: control-plane_group
   gather_facts: false
+  tags: ['postgres']
   tasks:
     - name: Apply Postgres PVC
       kubernetes.core.k8s:
@@ -89,6 +94,7 @@
 - name: Deploy Redis
   hosts: control-plane_group
   gather_facts: false
+  tags: ['redis']
   tasks:
     - name: Apply Redis Deployment
       kubernetes.core.k8s:
@@ -105,6 +111,7 @@
 - name: Deploy Backend
   hosts: control-plane_group
   gather_facts: false
+  tags: ['backend']
   tasks:
     - name: Apply Backend Deployment
       kubernetes.core.k8s:
@@ -121,6 +128,7 @@
 - name: Deploy Frontend
   hosts: control-plane_group
   gather_facts: false
+  tags: ['frontend']
   tasks:
     - name: Apply Frontend Deployment
       kubernetes.core.k8s:
@@ -137,6 +145,7 @@
 - name: Deploy Reverse Proxy Ingress
   hosts: control-plane_group
   gather_facts: false
+  tags: ['reverse-proxy']
   tasks:
     - name: Apply Ingress manifest
       kubernetes.core.k8s:
