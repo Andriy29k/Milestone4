@@ -88,11 +88,11 @@ pipeline {
                             ansible all -i inventory.ini -m ping
                         '''
                         
-                        withCredentials([string(credentialsId: 'restore_sql_secret', variable: 'RESTORE_SQL')]) {
+                        withCredentials([string(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE')]) {
                             dir('ansible') {
-                                sh """
-                                    ansible-playbook -i inventory.ini site.yml --extra-vars 'restore_sql="${RESTORE_SQL}"'
-                                """
+                                  sh '''
+                                    ansible-playbook site.yml --extra-vars "sql_file=$RESTORE_FILE"
+                                '''
                             }
                         }
 
