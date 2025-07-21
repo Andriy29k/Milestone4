@@ -98,7 +98,7 @@ pipeline {
             steps {
                 dir('ansible') {
                     sh '''
-                        ansible-playbook -i inventory.ini playbooks/install_k3s.yml -vvv
+                        ansible-playbook -i inventory.ini playbooks/install_k3s.yml -vvvv
                     '''
                 }
             }
