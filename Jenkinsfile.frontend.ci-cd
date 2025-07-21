@@ -61,9 +61,7 @@ pipeline {
                 }
                 dir('ansible') {
                     sh '''
-                        ansible all -i inventory.ini -m ping
-                        ansible-galaxy collection install community.docker
-                        ansible-playbook -i inventory.ini site.yml -l frontend,reverse_proxy
+                        ansible-playbook -i inventory.ini deploy_frontend.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
                     '''
                 }
             }

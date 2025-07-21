@@ -73,26 +73,37 @@ pipeline {
         //     }
         // }
 
-        stage ('Ansible Backend Configuration') {
-            steps {
-                dir('ansible/files') {
-                    sh '''
-                        chmod +x generate_inventory_from_config.sh
-                        bash generate_inventory_from_config.sh
-                    '''
-                }
+        stage('Ansible Backend Configuration') {
+    steps {
+        dir('ansible/files') {
+            sh '''
+                chmod +x generate_inventory_from_config.sh
+                bash generate_inventory_from_config.sh
+            '''
+        }
 
-                withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
-                    dir('ansible') {
-                        sh '''
-                            ansible all -i inventory.ini -m ping
-                            ansible-galaxy collection install community.docker
-                            ansible-playbook -i inventory.ini site.yml -l backend,database
-                        '''
-                    }
-                }
+        withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
+            dir('ansible') {
+                sh '''
+                    ansible all -i inventory.ini -m ping
+                '''
+
+                sh '''
+                    ansible-playbook -i inventory.ini deploy_postgres.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
+                '''
+
+                sh '''
+                    ansible-playbook -i inventory.ini deploy_redis.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
+                '''
+
+                sh '''
+                    ansible-playbook -i inventory.ini deploy_backend.yml --extra-vars "docker_password=$DOCKER_PASSWORD"
+                '''
             }
         }
+    }
+}
+
 
         // stage('Ansible Monitoring Configuration') {
         //     steps {
