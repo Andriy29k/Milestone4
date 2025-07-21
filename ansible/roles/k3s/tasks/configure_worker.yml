@@ -51,4 +51,3 @@
     name: k3s
     enabled: yes
     state: started
-    

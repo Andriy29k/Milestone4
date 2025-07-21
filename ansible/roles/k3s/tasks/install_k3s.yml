@@ -8,6 +8,14 @@
   roles:
     - k3s
 
+- name: Wait for token
+  wait_for:
+    path: /var/lib/rancher/k3s/server-node-token
+    state: present
+  delegate_to: "{{ groups['control_plane_group'][0] }}"
+  delay: 5
+  timeout: 30
+
 - name: Fetch k3s token from control plane
   hosts: control_plane_group
   become: true
