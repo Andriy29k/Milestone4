@@ -1,35 +1,55 @@
----
 - name: Setup K3s Control Plane
   hosts: control-plane_group
   become: true
   tags: ['k3s', 'control-plane']
   tasks:
-    - name: Install K3s on control plane
-      import_role:
-        name: k3s_install_control_plane
+    - name: Install K3s server on control-plane
+      shell: |
+        curl -sfL https://get.k3s.io | sh -s - server --write-kubeconfig-mode 644
+      args:
+        creates: /usr/local/bin/k3s
 
-- name: Join worker nodes to cluster
-  tags: ['workers']
-  hosts: 
-    - backend_group
-    - frontend_group
-    - database_group
-    - reverse_proxy_group
-    - monitoring_group
+    - name: Wait for K3s server to be ready
+      shell: /usr/local/bin/k3s kubectl get nodes
+      retries: 10
+      delay: 10
+      register: k3s_ready
+      until: k3s_ready.rc == 0
+      become: true
+
+    - name: Read K3s join token
+      shell: cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token
+      changed_when: false
+      become: true
+
+    - name: Set k3s_token fact for all hosts
+      set_fact:
+        k3s_token: "{{ hostvars[groups['control-plane_group'][0]].k3s_token.stdout }}"
+
+- name: Join worker nodes to K3s cluster
+  hosts: workers_group
   become: true
+  tags: ['workers']
   tasks:
-    - name: Join node to K3s cluster
-      import_role:
-        name: k3s_join_node
+    - name: Install K3s agent on worker nodes
+      shell: |
+        curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars[groups['control-plane_group'][0]].ansible_host }}:6443 K3S_TOKEN={{ hostvars[groups['control-plane_group'][0]].k3s_token.stdout }} sh -s - agent
+      args:
+        creates: /usr/local/bin/k3s
 
-- name: Label nodes
+- name: Label nodes by role
   hosts: control-plane_group
+  become: true
   gather_facts: false
   tags: ['k3s', 'control-plane']
   tasks:
     - name: Label nodes by groups
       shell: |
-        kubectl label node {{ item }} node-role={{ item_role }} --overwrite
+        /usr/local/bin/k3s kubectl label node {{ item }} node-role={{ node_roles[group] }} --overwrite
+      loop: "{{ groups['backend_group'] + groups['frontend_group'] + groups['database_group'] + groups['reverse_proxy_group'] + groups['monitoring_group'] }}"
+      loop_control:
+        loop_var: item
       vars:
         node_roles:
           backend_group: backend
@@ -37,14 +57,17 @@
           database_group: database
           reverse_proxy_group: reverse-proxy
           monitoring_group: monitoring
-      loop: "{{ groups['backend_group'] + groups['frontend_group'] + groups['database_group'] + groups['reverse_proxy_group'] + groups['monitoring_group'] }}"
-      loop_control:
-        loop_var: item
       vars_prompt: []
-      when: "'{{ item }}' in groups['backend_group']"
-      
+      when: >
+        "{{ item }}" in groups['backend_group'] or
+        "{{ item }}" in groups['frontend_group'] or
+        "{{ item }}" in groups['database_group'] or
+        "{{ item }}" in groups['reverse_proxy_group'] or
+        "{{ item }}" in groups['monitoring_group']
+
 - name: Create Docker Registry Secret regcred
   hosts: control-plane_group
+  become: true
   gather_facts: false
   tags: ['k3s', 'control-plane']
   tasks:

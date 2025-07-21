@@ -95,7 +95,7 @@ pipeline {
             steps {
                 dir('ansible') {
                     sh '''
-                        ansible-playbook -i inventory.ini site.yml --tags k3s,control-plane,workers
+                        ansible-playbook -i inventory.ini site.yml --tags k3s
                     '''
                 }
             }

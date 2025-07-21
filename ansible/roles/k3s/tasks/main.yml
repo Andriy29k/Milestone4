@@ -1,38 +1,37 @@
-- name: Install k3s on control-plane
-  shell: curl -sfL https://get.k3s.io | sh -s - server --write-kubeconfig-mode 644
-  when: inventory_hostname == 'control-plane'
+---
+- name: Install K3s server on control-plane
+  when: "'control-plane' in group_names"
+  become: true
+  shell: |
+    curl -sfL https://get.k3s.io | sh -s - server --write-kubeconfig-mode 644
+  args:
+    creates: /usr/local/bin/k3s
 
-- name: Get join token from control-plane
+- name: Wait for K3s server to be ready
+  when: "'control-plane' in group_names"
+  become: true
+  shell: |
+    until sudo k3s kubectl get nodes; do sleep 5; done
+  retries: 10
+  delay: 10
+  register: k3s_ready
+  until: k3s_ready.rc == 0
+
+- name: Read join token from control-plane
+  when: "'control-plane' in group_names"
+  become: true
   shell: cat /var/lib/rancher/k3s/server/node-token
   register: k3s_token
-  delegate_to: control-plane
-  run_once: true
+  changed_when: false
 
-- name: Install k3s agent on worker nodes
+- name: Set join token fact for all hosts
+  set_fact:
+    k3s_token: "{{ hostvars[groups['control-plane'][0]].k3s_token.stdout }}"
+
+- name: Install K3s agent on worker nodes
+  when: "'control-plane' not in group_names"
+  become: true
   shell: |
-    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars['control-plane'].ansible_host }}:6443 K3S_TOKEN={{ hostvars['control-plane'].k3s_token.stdout }} sh -s - agent
-  when: inventory_hostname != 'control-plane'
-
-- name: Generate .dockerconfigjson for regcred
-  template:
-    src: dockerconfigjson.j2
-    dest: /tmp/.dockerconfigjson
-  vars:
-    docker_username: "{{ docker_username }}"
-    docker_password: "{{ docker_password }}"
-    docker_email: "{{ docker_email }}"
-
-- name: Create Kubernetes secret regcred
-  kubernetes.core.k8s:
-    kubeconfig: /etc/rancher/k3s/k3s.yaml
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: regcred
-        namespace: default
-      type: kubernetes.io/dockerconfigjson
-      data:
-        .dockerconfigjson: "{{ lookup('file', '/tmp/.dockerconfigjson') | b64encode }}"
-
+    curl -sfL https://get.k3s.io | K3S_URL=https://{{ hostvars[groups['control-plane'][0]].ansible_host }}:6443 K3S_TOKEN={{ hostvars[groups['control-plane'][0]].k3s_token.stdout }} sh -s - agent
+  args:
+    creates: /usr/local/bin/k3s
