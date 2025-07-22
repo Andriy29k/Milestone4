@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-sql
+data:
+  restore.sql: |
+    {{ lookup('file', 'restore.sql') | indent(4) }}

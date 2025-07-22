@@ -1,0 +1,112 @@
+---
+- name: Create K3s directory structure and place manifests
+  hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    k3s_version: "v1.28.3+k3s1"
+    k3s_install_dir: "/usr/local/bin"
+    postgres_user: "{{ lookup('env', 'POSTGRES_USER') | default('admin', true) }}"
+    postgres_password: "{{ lookup('env', 'POSTGRES_PASSWORD') | default('admin', true) }}"
+    postgres_db: "{{ lookup('env', 'POSTGRES_DB') | default('class_schedule', true) }}"
+    postgres_storage_size: "1Gi"
+    postgres_image: "postgres:15"
+    redis_image: "{{ lookup('env', 'REDIS_IMAGE') | default('redis:7', true) }}"
+    redis_port: "6379"
+    redis_storage_type: "emptyDir"
+    backend_image: "{{ lookup('env', 'BACKEND_IMAGE') | default('andriy29k/class_schedule_backend:latest', true) }}"
+    backend_port: "8080"
+    db_endpoint: "{{ lookup('env', 'DB_ENDPOINT') | default('jdbc:postgresql://postgres:5432/' + postgres_db, true) }}"
+    db_username: "{{ postgres_user }}"
+    db_password: "{{ postgres_password }}"
+    redis_url: "{{ lookup('env', 'REDIS_URL') | default('redis://redis:6379', true) }}"
+    frontend_image: "{{ lookup('env', 'FRONTEND_IMAGE') | default('andriy29k/class_schedule_frontend:latest', true) }}"
+    frontend_port: "3000"
+    backend_url: "{{ lookup('env', 'BACKEND_URL') | default('http://backend', true) }}"
+    ingress_backend_path: "/api"
+    ingress_backend_service: "backend"
+    ingress_backend_service_port: "80"
+    ingress_frontend_path: "/"
+    ingress_frontend_service: "frontend"
+    ingress_frontend_service_port: "80"
+
+  tasks:
+    - name: Create K3s directory structure
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - k3s
+        - k3s/database
+        - k3s/redis
+        - k3s/frontend
+        - k3s/backend
+        - k3s/reverse-proxy
+        - k3s/monitoring
+
+    - name: Place frontend deployment manifest
+      ansible.builtin.template:
+        src: templates/frontend-deployment.yaml.j2
+        dest: k3s/frontend/frontend-deployment.yaml
+        mode: '0644'
+    
+    - name: Place frontend service manifest
+      ansible.builtin.template:
+        src: templates/frontend-service.yaml.j2
+        dest: k3s/frontend/frontend-service.yaml
+        mode: '0644'
+
+    - name: Place backend deployment manifest
+      ansible.builtin.template:
+        src: templates/backend-deployment.yaml.j2
+        dest: k3s/backend/backend-deployment.yaml
+        mode: '0644'
+    
+    - name: Place backend service manifest
+      ansible.builtin.template:
+        src: templates/backend-service.yaml.j2
+        dest: k3s/backend/backend-service.yaml
+        mode: '0644'
+
+    - name: Place postgres deploy manifest
+      ansible.builtin.template:
+        src: templates/postgres-deployment.yaml.j2
+        dest: k3s/database/postgres-deployment.yaml
+        mode: '0644'
+    
+    - name: Place postgres service manifest
+      ansible.builtin.template:
+        src: templates/postgres-service.yaml.j2
+        dest: k3s/database/postgres-service.yaml
+        mode: '0644'
+    
+    - name: Place postgres configmap manifest
+      ansible.builtin.template:
+        src: templates/postgres-configmap.yaml.j2
+        dest: k3s/database/postgres-configmap.yaml
+        mode: '0644'
+    
+    - name: Place postgres pvc manifest
+      ansible.builtin.template:
+        src: templates/postgres-pvc.yaml.j2
+        dest: k3s/database/postgres-pvc.yaml
+        mode: '0644'
+
+    - name: Place redis backend manifest
+      ansible.builtin.template:
+        src: templates/redis-deployment.yaml.j2
+        dest: k3s/redis/redis-deployment.yaml
+        mode: '0644'
+    
+    - name: Place redis service manifest
+      ansible.builtin.template:
+        src: templates/redis-service.yaml.j2
+        dest: k3s/redis/redis-service.yaml
+        mode: '0644'
+
+    - name: Place ingress manifest with middleware
+      ansible.builtin.template:
+        src: templates/ingress.yaml.j2
+        dest: k3s/reverse-proxy/ingress.yaml
+        mode: '0644'

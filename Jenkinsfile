@@ -102,13 +102,15 @@ pipeline {
                     '''
                 }
             }
-        }    
+        }
 
-        stage('Deploy Services') {
+        stage('Deploy Manifests') {
             steps {
                 dir('ansible') {
                     withCredentials([
                         file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH'),
+                        file(credentialsId: 'CERT', variable: 'CERT'),
+                        file(credentialsId: 'KEY', variable: 'KEY'),
                         string(credentialsId: 'POSTGRES_USER', variable: 'POSTGRES_USER'),
                         string(credentialsId: 'POSTGRES_PASSWORD', variable: 'POSTGRES_PASSWORD'),
                         string(credentialsId: 'POSTGRES_DB', variable: 'POSTGRES_DB'),
@@ -118,19 +120,45 @@ pipeline {
                         string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKERHUB_USERNAME'),
                         string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKERHUB_PASSWORD'),
                         string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKERHUB_EMAIL')
-                    ]) {
+                    ]) { 
                         sh '''
-                            mkdir -p roles/postgres/files
                             cat $RESTORE_FILE_PATH > roles/postgres/files/restore.sql
-                            ansible-playbook -i inventory.ini playbooks/deploy_postgres.yml
-                            ansible-playbook -i inventory.ini playbooks/deploy_redis.yml
-                            ansible-playbook -i inventory.ini playbooks/deploy_backend.yml
-                            ansible-playbook -i inventory.ini playbooks/deploy_frontend.yml
-                            ansible-playbook -i inventory.ini playbooks/deploy_ingress.yml
+                            cat $CERT > roles/postgres/files/cert.pem
+                            cat $KEY > roles/postgres/files/privkey.pem
+                            ansible-playbook -i inventory.ini playbooks/deploy_manifests.yml
                         '''
                     }
                 }
             }
-        }
+        }     
+
+        // stage('Deploy Services') {
+        //     steps {
+        //         dir('ansible') {
+        //             withCredentials([
+        //                 file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH'),
+        //                 string(credentialsId: 'POSTGRES_USER', variable: 'POSTGRES_USER'),
+        //                 string(credentialsId: 'POSTGRES_PASSWORD', variable: 'POSTGRES_PASSWORD'),
+        //                 string(credentialsId: 'POSTGRES_DB', variable: 'POSTGRES_DB'),
+        //                 string(credentialsId: 'REDIS_IMAGE', variable: 'REDIS_IMAGE'),
+        //                 string(credentialsId: 'BACKEND_IMAGE', variable: 'BACKEND_IMAGE'),
+        //                 string(credentialsId: 'FRONTEND_IMAGE', variable: 'FRONTEND_IMAGE'),
+        //                 string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKERHUB_USERNAME'),
+        //                 string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKERHUB_PASSWORD'),
+        //                 string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKERHUB_EMAIL')
+        //             ]) {
+        //                 sh '''
+        //                     mkdir -p roles/postgres/files
+        //                     cat $RESTORE_FILE_PATH > roles/postgres/files/restore.sql
+        //                     ansible-playbook -i inventory.ini playbooks/deploy_postgres.yml
+        //                     ansible-playbook -i inventory.ini playbooks/deploy_redis.yml
+        //                     ansible-playbook -i inventory.ini playbooks/deploy_backend.yml
+        //                     ansible-playbook -i inventory.ini playbooks/deploy_frontend.yml
+        //                     ansible-playbook -i inventory.ini playbooks/deploy_ingress.yml
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
