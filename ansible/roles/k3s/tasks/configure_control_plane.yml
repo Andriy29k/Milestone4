@@ -45,3 +45,25 @@
     name: k3s
     enabled: yes
     state: started
+
+- name: Copy kubeconfig to user home
+  copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /home/{{ ansible_user }}/.kube/config
+    remote_src: yes
+  become: true
+
+- name: Set correct permissions for kubeconfig
+  file:
+    path: /home/{{ ansible_user }}/.kube/config
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+  become: true
+
+- name: Set KUBECONFIG environment variable
+  lineinfile:
+    path: /home/{{ ansible_user }}/.bashrc
+    line: 'export KUBECONFIG=/home/{{ ansible_user }}/.kube/config'
+    create: yes
+  become: true

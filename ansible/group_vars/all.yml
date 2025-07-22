@@ -2,7 +2,7 @@
 ansible_python_interpreter: /usr/bin/python3
 k3s_version: "v1.28.3+k3s1"
 k3s_install_dir: "/usr/local/bin"
-k3s_token: "{{ lookup('password', '/tmp/k3s_token length=40') }}"
+# k3s_token: "{{ lookup('password', '/tmp/k3s_token length=40') }}"  # Видалено або прокоментуй
 
 # PostgreSQL variables
 postgres_user: "{{ lookup('env', 'POSTGRES_USER') | default('admin', true) }}"
