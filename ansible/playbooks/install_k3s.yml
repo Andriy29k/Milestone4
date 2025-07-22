@@ -23,7 +23,7 @@
     - name: Retrieve k3s token
       slurp:
         src: /var/lib/rancher/k3s/server/token
-        register: k3s_token_file
+      register: k3s_token_file
 
     - name: Set k3s_token fact
       set_fact:
