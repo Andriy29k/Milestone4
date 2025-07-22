@@ -1,5 +1,5 @@
 ---
-- hosts: control-plane_group
+- hosts: control_plane_group
   become: yes
   roles:
     - frontend
