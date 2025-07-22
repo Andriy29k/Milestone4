@@ -4,7 +4,7 @@
   become: true
   vars:
     k3s_role: "server"
-    k3s_server_options: "--cluster-init"
+    k3s_server_options: "--cluster-init --disable=traefik --disable=servicelb"
   roles:
     - k3s
 
@@ -29,16 +29,11 @@
       set_fact:
         k3s_token: "{{ k3s_token_file.content | b64decode | trim }}"
 
-    - name: Debug k3s token
-      debug:
-        msg: "K3S Token: {{ k3s_token }}"
-
 - name: Install and configure k3s workers
   hosts: workers_group
   become: true
   vars:
     k3s_role: "agent"
-    k3s_server_url: "https://{{ hostvars[groups['control_plane_group'][0]]['ansible_host'] }}:6443"
     k3s_token: "{{ hostvars[groups['control_plane_group'][0]]['k3s_token'] }}"
   roles:
     - k3s

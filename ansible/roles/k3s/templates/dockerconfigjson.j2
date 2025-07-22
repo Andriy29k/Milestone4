@@ -3,8 +3,8 @@
     "https://index.docker.io/v1/": {
       "username": "{{ docker_username }}",
       "password": "{{ docker_password }}",
-      "email": "{{ docker_email }}",
-      "auth": "{{ (docker_username + ':' + docker_password + ':' + docker_email) | b64encode }}"
+      "email": "{{ docker_email | default('') }}",
+      "auth": "{{ (docker_username + ':' + docker_password) | b64encode }}"
     }
   }
 }
