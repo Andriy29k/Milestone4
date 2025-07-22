@@ -94,15 +94,15 @@ pipeline {
             }
         }
 
-        stage('K3S Setup') {
-            steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i inventory.ini playbooks/install_k3s.yml
-                    '''
-                }
-            }
-        }
+        // stage('K3S Setup') {
+        //     steps {
+        //         dir('ansible') {
+        //             sh '''
+        //                 ansible-playbook -i inventory.ini playbooks/install_k3s.yml
+        //             '''
+        //         }
+        //     }
+        // }
 
         stage('Deploy Manifests') {
             steps {
