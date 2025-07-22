@@ -46,6 +46,13 @@
     enabled: yes
     state: started
 
+- name: Create .kube directory
+  file:
+    path: /home/{{ ansible_user }}/.kube
+    state: directory
+    mode: '0755'
+  become: true
+
 - name: Copy kubeconfig to user home
   copy:
     src: /etc/rancher/k3s/k3s.yaml
