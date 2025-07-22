@@ -111,11 +111,4 @@ module "ssh_config" {
   depends_on = [module.bastion, module.compute, module.reverse_proxy, module.database]
 }
 
-module "dns" {
-  source      = "./modules/dns"
-  dns_name    = var.dns_name
-  external_ip = module.reverse_proxy.reverse_proxy_external_ip
-}
-
-
 

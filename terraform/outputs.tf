@@ -66,8 +66,3 @@ output "debug_machine_ips" {
   value = module.compute.all_internal_ips
 }
 
-output "dns_name_servers" {
-  value = module.dns.dns_name_servers
-}
-
-
