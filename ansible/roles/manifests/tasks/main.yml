@@ -1,6 +1,7 @@
 ---
 - name: Create K3s directory structure and place manifests
-  hosts: localhost
+  hosts: control_plane_group
+  become: yes
   connection: local
   vars:
     ansible_python_interpreter: /usr/bin/python3
@@ -23,6 +24,8 @@
     frontend_image: "{{ lookup('env', 'FRONTEND_IMAGE') | default('andriy29k/class_schedule_frontend:latest', true) }}"
     frontend_port: "3000"
     backend_url: "{{ lookup('env', 'BACKEND_URL') | default('http://backend', true) }}"
+    dockerhub_username: "{{ lookup('env', 'DOCKERHUB_USERNAME') }}"
+    dockerhub_password: "{{ lookup('env', 'DOCKERHUB_PASSWORD') }}"
     ingress_backend_path: "/api"
     ingress_backend_service: "backend"
     ingress_backend_service_port: "80"
@@ -50,7 +53,7 @@
         src: templates/frontend-deployment.yaml.j2
         dest: k3s/frontend/frontend-deployment.yaml
         mode: '0644'
-    
+
     - name: Place frontend service manifest
       ansible.builtin.template:
         src: templates/frontend-service.yaml.j2
@@ -62,43 +65,43 @@
         src: templates/backend-deployment.yaml.j2
         dest: k3s/backend/backend-deployment.yaml
         mode: '0644'
-    
+
     - name: Place backend service manifest
       ansible.builtin.template:
         src: templates/backend-service.yaml.j2
         dest: k3s/backend/backend-service.yaml
         mode: '0644'
 
-    - name: Place postgres deploy manifest
+    - name: Place postgres deployment manifest
       ansible.builtin.template:
         src: templates/postgres-deployment.yaml.j2
         dest: k3s/database/postgres-deployment.yaml
         mode: '0644'
-    
+
     - name: Place postgres service manifest
       ansible.builtin.template:
         src: templates/postgres-service.yaml.j2
         dest: k3s/database/postgres-service.yaml
         mode: '0644'
-    
+
     - name: Place postgres configmap manifest
       ansible.builtin.template:
         src: templates/postgres-configmap.yaml.j2
         dest: k3s/database/postgres-configmap.yaml
         mode: '0644'
-    
+
     - name: Place postgres pvc manifest
       ansible.builtin.template:
         src: templates/postgres-pvc.yaml.j2
         dest: k3s/database/postgres-pvc.yaml
         mode: '0644'
 
-    - name: Place redis backend manifest
+    - name: Place redis deployment manifest
       ansible.builtin.template:
         src: templates/redis-deployment.yaml.j2
         dest: k3s/redis/redis-deployment.yaml
         mode: '0644'
-    
+
     - name: Place redis service manifest
       ansible.builtin.template:
         src: templates/redis-service.yaml.j2
