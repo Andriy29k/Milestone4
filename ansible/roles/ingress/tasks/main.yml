@@ -3,7 +3,7 @@
   apt:
     name: kubectl
     state: present
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Install Nginx Ingress Controller
   kubernetes.core.helm:
@@ -17,10 +17,10 @@
       controller:
         service:
           type: ClusterIP
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply Ingress
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'ingress.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']

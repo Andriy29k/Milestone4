@@ -3,7 +3,7 @@
   apt:
     name: kubectl
     state: present
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Label database node
   kubernetes.core.k8s:
@@ -14,28 +14,28 @@
       metadata:
         labels:
           node-role: database
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply PostgreSQL Service
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'postgres-service.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply PostgreSQL PVC
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'postgres-pvc.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply PostgreSQL ConfigMap
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'postgres-configmap.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply PostgreSQL Deployment
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'postgres-deployment.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']

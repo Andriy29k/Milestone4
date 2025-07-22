@@ -3,7 +3,7 @@
   apt:
     name: kubectl
     state: present
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Label frontend node
   kubernetes.core.k8s:
@@ -14,7 +14,7 @@
       metadata:
         labels:
           node-role: frontend
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Check if regcred secret exists
   kubernetes.core.k8s_info:
@@ -22,7 +22,7 @@
     name: regcred
     namespace: default
   register: regcred_secret
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Create Docker Hub credentials secret if not exists
   kubernetes.core.k8s:
@@ -40,17 +40,17 @@
         }
       }
   when:
-    - inventory_hostname in groups['control-plane_group']
+    - inventory_hostname in groups['control_plane_group']
     - regcred_secret.resources | length == 0
 
 - name: Apply Frontend Service
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'frontend-service.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply Frontend Deployment
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'frontend-deployment.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']

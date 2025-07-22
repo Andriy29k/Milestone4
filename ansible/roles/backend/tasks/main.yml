@@ -3,7 +3,7 @@
   apt:
     name: kubectl
     state: present
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Create Docker Hub credentials secret
   kubernetes.core.k8s:
@@ -21,16 +21,16 @@
           }
         }
       }
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply Backend Service
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'backend-service.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
 
 - name: Apply Backend Deployment
   kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'backend-deployment.yaml.j2') }}"
-  when: inventory_hostname in groups['control-plane_group']
+  when: inventory_hostname in groups['control_plane_group']
