@@ -18,20 +18,16 @@ output "monitoring_internal_ip" {
   value = module.compute.monitoring_internal_ip
 }
 
-output "control_plane_internal_ip" {
-  value = module.compute.control_plane_internal_ip
-}
-
 output "database_internal_ip" {
   value = module.database.database_internal_ip
 }
 
-output "reverse_proxy_internal_ip" {
-  value = module.reverse_proxy.reverse_proxy_internal_ip
+output "control_plane_internal_ip" {
+  value = module.control_plane.control_plane_internal_ip
 }
 
-output "reverse_proxy_external_ip" {
-  value = module.reverse_proxy.reverse_proxy_external_ip
+output "control_plane_external_ip" {
+  value = module.control_plane.control_plane_external_ip
 }
 
 output "all_internal_ips" {

@@ -1,5 +1,5 @@
 resource "google_compute_instance" "reverse_proxy" {
-  name         = "reverse-proxy"
+  name         = "control-plane"
   machine_type = var.machine_type
   zone         = var.zone
 
@@ -19,5 +19,5 @@ resource "google_compute_instance" "reverse_proxy" {
     access_config {}
   }
 
-  tags = ["reverse-proxy"]
+  tags = ["control-plane"]
 }
