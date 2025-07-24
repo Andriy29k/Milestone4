@@ -1,11 +1,7 @@
 pipeline {
     agent {label 'Linux'}
 
-    environment {
-        GITHUB_URL="https://github.com/Andriy29k/intern_project01.git"
-        FRONTEND_IMAGE_NAME = 'class_schedule_frontend'
-        IMAGE_TAG = 'latest'
-    }
+    
 
     tools {
         nodejs 'nodejs-18'

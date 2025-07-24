@@ -11,6 +11,19 @@
     state: directory
     mode: '0755'
 
+- name: Copy SSH key to control plane
+  copy:
+    src: "{{ ssh_key_path }}"
+    dest: "~/.ssh/id_rsa"
+    mode: '0600'
+
+- name: Disable StrictHostKeyChecking
+  lineinfile:
+    path: "~/.ssh/config"
+    line: "StrictHostKeyChecking no"
+    create: yes
+    mode: '0600'
+
 - name: Clone or update repositories
   git:
     repo: "{{ item.repo }}"
@@ -18,7 +31,7 @@
     version: main
     accept_hostkey: yes
     update: yes
-    key_file: "{{ ssh_key_path | default(omit) }}"
+    key_file: "~/.ssh/id_rsa"
   with_items:
     - { name: "Backend",  repo: "{{ github_repo_backend }}",  dest: "~/k3s/backend" }
     - { name: "Frontend", repo: "{{ github_repo_frontend }}", dest: "~/k3s/frontend" }
