@@ -7,7 +7,7 @@
 
 - name: Ensure k3s directory exists
   file:
-    path: "{{ ansible_env.HOME }}/k3s"
+    path: "/home/andriy29k/k3s"
     state: directory
     mode: '0755'
 
@@ -27,7 +27,7 @@
 - name: Clone or update repositories
   git:
     repo: "{{ item.repo }}"
-    dest: "{{ ansible_env.HOME }}/k3s/{{ item.name | lower }}"
+    dest: "/home/andriy29k/k3s/{{ item.name | lower }}"
     version: main
     accept_hostkey: yes
     update: yes
