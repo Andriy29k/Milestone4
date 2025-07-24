@@ -4,6 +4,7 @@ pipeline {
     environment {
         GITHUB_URL="https://github.com/Andriy29k/Milestone4.git"
         BACKEND_IMAGE_NAME = 'class_schedule_backend'
+        FRONTEND_IMAGE_NAME = 'class_schedule_frontend'
         IMAGE_TAG = 'latest'
         ANSIBLE_CONFIG = "${WORKSPACE}/ansible/ansible.cfg"
         INVENTORY = "${WORKSPACE}/ansible/inventory.ini"
@@ -12,6 +13,7 @@ pipeline {
     tools {
         gradle 'gradle-6.8'
         jdk 'jdk-11'
+        nodejs 'nodejs-18'
     }
 
     stages {
@@ -20,6 +22,37 @@ pipeline {
                 git branch: 'dev',
                     url: "${env.GITHUB_URL}",
                     credentialsId: 'github-credentials'
+            }
+        }
+
+        stage('Frontend Build') {
+            environment { REACT_APP_API_BASE_URL = 'DOMAIN_TOKEN' }
+            steps {
+                dir('frontend/frontend') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            } 
+        }
+
+        stage('Docker images build') {
+            steps {
+                dir('frontend') {
+                    script {
+                        sh 'cp -r frontend/build ./build'
+                    }
+                }
+                withCredentials([usernamePassword(
+                        credentialsId: 'DOCKERHUB_CREDENTIALS', 
+                        usernameVariable: 'DOCKERHUB_USERNAME', 
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                )]) {
+                    dir('frontend') {
+                        sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
+                        sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
+                        sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
+                    }
+                }
             }
         }
         // stage('Build Backend') {
@@ -129,34 +162,5 @@ pipeline {
                 }
             }
         }
-
-        // stage('Deploy Services') {
-        //     steps {
-        //         dir('ansible') {
-        //             withCredentials([
-        //                 file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH'),
-        //                 string(credentialsId: 'POSTGRES_USER', variable: 'POSTGRES_USER'),
-        //                 string(credentialsId: 'POSTGRES_PASSWORD', variable: 'POSTGRES_PASSWORD'),
-        //                 string(credentialsId: 'POSTGRES_DB', variable: 'POSTGRES_DB'),
-        //                 string(credentialsId: 'REDIS_IMAGE', variable: 'REDIS_IMAGE'),
-        //                 string(credentialsId: 'BACKEND_IMAGE', variable: 'BACKEND_IMAGE'),
-        //                 string(credentialsId: 'FRONTEND_IMAGE', variable: 'FRONTEND_IMAGE'),
-        //                 string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKERHUB_USERNAME'),
-        //                 string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKERHUB_PASSWORD'),
-        //                 string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKERHUB_EMAIL')
-        //             ]) {
-        //                 sh '''
-        //                     mkdir -p roles/postgres/files
-        //                     cat $RESTORE_FILE_PATH > roles/postgres/files/restore.sql
-        //                     ansible-playbook -i inventory.ini playbooks/deploy_postgres.yml
-        //                     ansible-playbook -i inventory.ini playbooks/deploy_redis.yml
-        //                     ansible-playbook -i inventory.ini playbooks/deploy_backend.yml
-        //                     ansible-playbook -i inventory.ini playbooks/deploy_frontend.yml
-        //                     ansible-playbook -i inventory.ini playbooks/deploy_ingress.yml
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
