@@ -10,26 +10,14 @@
     dest: /home/andriy29k/k3s/frontend/frontend/values.yaml
     mode: '0644'
 
-- name: Update redis values.yaml
-  template:
-    src: redis_values.yaml.j2
-    dest: /home/andriy29k/k3s/redis/redis/values.yaml
-    mode: '0644'
-
-- name: Update database values.yaml
-  template:
-    src: database_values.yaml.j2
-    dest: /home/andriy29k/k3s/database/database/values.yaml
-    mode: '0644'
-
-- name: Ensure files directory exists for database
+- name: Ensure files directory exists
   file:
-    path: "/root/k3s/database/database/files"
+    path: /home/andriy29k/k3s/database/database/files
     state: directory
     mode: '0755'
 
-- name: Copy DB dump to files directory
+- name: Copy DB dump
   copy:
     src: "{{ db_dump_path }}"
-    dest: "/root/k3s/database/database/files/init.sql"
+    dest: /home/andriy29k/k3s/database/database/files/init.sql
     mode: '0644'
