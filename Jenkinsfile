@@ -198,25 +198,35 @@ pipeline {
         stage('Update values & put restore file') {
             steps {
                 withCredentials([
-                file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
-                file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
-            ]) {
-                dir('ansible'){
-                    sh '''
-                            cp $VALUES_FILE ./values.yaml
-
+                    file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
+                    file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
+                ]) {
+                    dir('ansible') {
+                        sh '''
+                            # Перевіряємо права доступу до файлів
+                            ls -l $VALUES_FILE
+                            ls -l $DB_DUMP_FILE
+                            
+                            # Копіюємо VALUES_FILE у тимчасовий файл у /tmp
+                            cp $VALUES_FILE /tmp/values.yaml
+                            
+                            # Перевіряємо права доступу до /tmp/values.yaml
+                            ls -l /tmp/values.yaml
+                            
+                            # Перевіряємо наявність inventory.ini
                             if [ ! -f inventory.ini ]; then
                                 echo "Error: inventory.ini not found!"
                                 exit 1
                             fi
-
+                            
+                            # Запускаємо Ansible playbook
                             ansible-playbook playbooks/update_values.yml \
                                 -i inventory.ini \
-                                -e @$PWD/values.yaml \
+                                -e @/tmp/values.yaml \
                                 -e db_dump_path=$DB_DUMP_FILE
-                        '''              
+                        '''
                     }
-                } 
+                }
             }
         }
     }
