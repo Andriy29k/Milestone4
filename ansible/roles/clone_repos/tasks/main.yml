@@ -1,0 +1,21 @@
+- name: Install Git if not present
+  become: true
+  apt:
+    name: git
+    state: present
+    update_cache: yes
+
+- name: Ensure k3s directory exists
+  file:
+    path: "~/k3s"
+    state: directory
+    mode: '0755'
+
+- name: Clone or update repositories
+  git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.dest }}"
+    version: "main"
+    accept_hostkey: yes
+    update: yes
+  loop: "{{ repos }}"

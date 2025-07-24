@@ -1,0 +1,6 @@
+---
+- name: Install Git and clone repositories
+  hosts: control_plane
+  become: true
+  roles:
+    - clone_repos
