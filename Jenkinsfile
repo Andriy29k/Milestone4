@@ -25,36 +25,36 @@ pipeline {
             }
         }
 
-        stage('Frontend Build') {
-            environment { REACT_APP_API_BASE_URL = 'DOMAIN_TOKEN' }
-            steps {
-                dir('frontend/frontend') {
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
-            } 
-        }
+        // stage('Frontend Build') {
+        //     environment { REACT_APP_API_BASE_URL = 'DOMAIN_TOKEN' }
+        //     steps {
+        //         dir('frontend/frontend') {
+        //             sh 'npm install'
+        //             sh 'npm run build'
+        //         }
+        //     } 
+        // }
 
-        stage('Docker, frontend image build') {
-            steps {
-                dir('frontend') {
-                    script {
-                        sh 'cp -r frontend/build ./build'
-                    }
-                }
-                withCredentials([usernamePassword(
-                        credentialsId: 'DOCKERHUB_CREDENTIALS', 
-                        usernameVariable: 'DOCKERHUB_USERNAME', 
-                        passwordVariable: 'DOCKERHUB_PASSWORD'
-                )]) {
-                    dir('frontend') {
-                        sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
-                        sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
-                        sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
-                    }
-                }
-            }
-        }
+        // stage('Docker, frontend image build') {
+        //     steps {
+        //         dir('frontend') {
+        //             script {
+        //                 sh 'cp -r frontend/build ./build'
+        //             }
+        //         }
+        //         withCredentials([usernamePassword(
+        //                 credentialsId: 'DOCKERHUB_CREDENTIALS', 
+        //                 usernameVariable: 'DOCKERHUB_USERNAME', 
+        //                 passwordVariable: 'DOCKERHUB_PASSWORD'
+        //         )]) {
+        //             dir('frontend') {
+        //                 sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
+        //                 sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
+        //                 sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
+        //             }
+        //         }
+        //     }
+        // }
         // stage('Build Backend') {
         //     steps {
         //         dir('backend') {
