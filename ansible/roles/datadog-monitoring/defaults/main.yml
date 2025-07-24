@@ -1,6 +1,6 @@
 datadog_namespace: monitoring
 release_name: datadog
-chart_version: 3.1.0
+chart_version: 3.69.0
 datadog_api_key: "{{ lookup('env', 'DATADOG_API_KEY') }}"
 datadog_app_key: "{{ lookup('env', 'DATADOG_APP_KEY') }}"
 cluster_name: default
