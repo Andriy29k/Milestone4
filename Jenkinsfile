@@ -198,8 +198,7 @@ pipeline {
         stage('Update values') {
             steps {
                 dir('ansible') {
-                    withCredentials([
-                        string(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE')
+                    withCredentials([file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE')
                     ]) {
                         sh """
                             ansible-playbook -i inventory.ini playbooks/update_values.yml -e "@${VALUES_FILE}" 
