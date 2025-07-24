@@ -201,12 +201,14 @@ pipeline {
                 file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
                 file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
             ]) {
+                dir('ansible'){
                     sh '''
-                        cat $VALUES_FILE | ansible-playbook ansible/playbooks/update_values.yml \
-                          -i ansible/inventory.ini \
+                        cat $VALUES_FILE | ansible-playbook playbooks/update_values.yml \
+                          -i inventory.ini \
                           -e @- \
                           -e db_dump_path=$DB_DUMP_FILE
-                    '''
+                        '''                
+                    }
                 } 
             }
         }
