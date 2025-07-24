@@ -1,0 +1,20 @@
+- name: Create namespace if not exists
+  command: >
+    kubectl create namespace {{ namespace }} --dry-run=client -o yaml | kubectl apply -f -
+
+- name: Create Docker registry secret
+  command: >
+    kubectl create secret docker-registry regcred
+      --docker-username={{ docker_user }}
+      --docker-password={{ docker_pass }}
+      --docker-email={{ docker_email }}
+      --namespace={{ namespace }}
+      --dry-run=client -o yaml | kubectl apply -f -
+
+- name: Create TLS secret
+  command: >
+    kubectl create secret tls tls-secret
+    --cert={{ tls_crt }}
+    --key={{ tls_key }}
+    --namespace={{ namespace }}
+    --dry-run=client -o yaml | kubectl apply -f -

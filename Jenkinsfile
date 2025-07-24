@@ -127,11 +127,40 @@ pipeline {
             }
         }
 
-        stage('Setup K3s Cluster') {
+        stage('Setup K3S') {
             steps {
-                sh '''
-                    ansible-playbook -i ${INVENTORY} ${WORKSPACE}/ansible/site.yml
-                '''              
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i ${INVENTORY} playbooks/setup_k3s.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Setup Helm') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook -i ${INVENTORY} playbooks/setup_helm.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Setup Secrets') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'K8S-NAMESPACE', variable: 'K8S_NAMESPACE'),
+                    usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS'),
+                    string(credentialsId: 'DOCKER-EMAIL', variable: 'DOCKER_EMAIL'),
+                    file(credentialsId: 'CERT', variable: 'TLS_CRT'),
+                    file(credentialsId: 'KEY', variable: 'TLS_KEY')
+                ]) {
+                    sh '''
+                        ansible-playbook -i ansible/inventory.ini ansible/playbooks/setup_secrets.yml \
+                          --extra-vars "namespace=$K8S_NAMESPACE docker_user=$DOCKER_USER docker_pass=$DOCKER_PASS docker_email=$DOCKER_EMAIL tls_crt=$TLS_CRT tls_key=$TLS_KEY"
+                    '''
+                }
             }
         }
     }

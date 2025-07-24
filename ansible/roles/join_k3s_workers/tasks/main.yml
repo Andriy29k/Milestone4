@@ -1,6 +1,0 @@
----
-- name: Join worker node to k3s cluster
-  shell: |
-    curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION={{ k3s_version }} K3S_URL=https://{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}:6443 K3S_TOKEN={{ hostvars['localhost']['node_token']['content'] | b64decode | trim }} sh -
-  args:
-    creates: /usr/local/bin/k3s-agent
