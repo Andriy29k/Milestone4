@@ -172,35 +172,34 @@ pipeline {
         //     }
         // }
         
-        stage('Clone Repositories') {
+        // stage('Clone Repositories') {
+        //     steps {
+        //         withCredentials([
+        //             sshUserPrivateKey(credentialsId: 'GITHUB_SSH_KEY', keyFileVariable: 'SSH_KEY'),
+        //             string(credentialsId: 'GITHUB_REPO_REDIS', variable: 'GITHUB_REPO_REDIS'),
+        //             string(credentialsId: 'GITHUB_REPO_DATABASE', variable: 'GITHUB_REPO_DATABASE'),
+        //             string(credentialsId: 'GITHUB_REPO_FRONTEND', variable: 'GITHUB_REPO_FRONTEND'),
+        //             string(credentialsId: 'GITHUB_REPO_BACKEND', variable: 'GITHUB_REPO_BACKEND')
+        //         ]) {
+        //             dir('ansible') {
+        //                 sh """
+        //                     ansible-playbook -i inventory.ini playbooks/clone_repos.yml \
+        //                       -e github_repo_backend=${GITHUB_REPO_BACKEND} \
+        //                       -e github_repo_frontend=${GITHUB_REPO_FRONTEND} \
+        //                       -e github_repo_redis=${GITHUB_REPO_REDIS} \
+        //                       -e github_repo_database=${GITHUB_REPO_DATABASE} \
+        //                       -e ssh_key_path=${SSH_KEY}
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Update values & put restore file') {
             steps {
                 withCredentials([
-                    sshUserPrivateKey(credentialsId: 'GITHUB_SSH_KEY', keyFileVariable: 'SSH_KEY'),
-                    string(credentialsId: 'GITHUB_REPO_REDIS', variable: 'GITHUB_REPO_REDIS'),
-                    string(credentialsId: 'GITHUB_REPO_DATABASE', variable: 'GITHUB_REPO_DATABASE'),
-                    string(credentialsId: 'GITHUB_REPO_FRONTEND', variable: 'GITHUB_REPO_FRONTEND'),
-                    string(credentialsId: 'GITHUB_REPO_BACKEND', variable: 'GITHUB_REPO_BACKEND')
-                ]) {
-                    dir('ansible') {
-                        sh """
-                            ansible-playbook -i inventory.ini playbooks/clone_repos.yml \
-                              -e github_repo_backend=${GITHUB_REPO_BACKEND} \
-                              -e github_repo_frontend=${GITHUB_REPO_FRONTEND} \
-                              -e github_repo_redis=${GITHUB_REPO_REDIS} \
-                              -e github_repo_database=${GITHUB_REPO_DATABASE} \
-                              -e ssh_key_path=${SSH_KEY}
-                        """
-                    }
-                }
-            }
-        }
-
-    stage('Update values & put restore file') {
-        steps {
-            withCredentials([
-                file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
-                file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
-            ])  {
+                    file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
+                    file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE') ]) {
                     dir('ansible') {
                         sh '''
                             cp $VALUES_FILE /tmp/values.yaml
