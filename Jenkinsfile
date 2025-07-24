@@ -5,6 +5,8 @@ pipeline {
         GITHUB_URL="https://github.com/Andriy29k/Milestone4.git"
         BACKEND_IMAGE_NAME = 'class_schedule_backend'
         IMAGE_TAG = 'latest'
+        ANSIBLE_CONFIG = "${WORKSPACE}/ansible/ansible.cfg"
+        INVENTORY = "${WORKSPACE}/ansible/inventory.ini"
     }
 
     tools {
@@ -49,6 +51,29 @@ pipeline {
         //     }
         // }
 
+        stage('Docker images build') {
+            steps {
+                dir('frontend/frontend') {
+                   sh '''
+                        mkdir -p ../build
+                        tar -xzf frontend-artifact.tar.gz -C ../build/
+                        rm -rf build
+                    '''
+                }
+                withCredentials([usernamePassword(
+                        credentialsId: 'DOCKERHUB_CREDENTIALS', 
+                        usernameVariable: 'DOCKERHUB_USERNAME', 
+                        passwordVariable: 'DOCKERHUB_PASSWORD'
+                )]) {
+                    dir('frontend') {
+                        sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
+                        sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
+                        sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
+                    }
+                }
+            }
+        }
+
         // stage('Backend image build') {
         //     steps {
         //         script {
@@ -73,19 +98,19 @@ pipeline {
         //     }
         // }
 
+        stage('Generate Inventory') {
+            steps {
+                sh '''
+                cd terraform/scripts
+                chmod +x generate_inventory.sh
+                ./generate_inventory.sh
+                '''
+                sh 'cat ${INVENTORY}'
+            }
+        }
+
         stage('Ansible inventory generation') {
             steps {
-                dir ('ansible') {
-                    sh '''
-                        rm -rf inventory.ini
-                    '''
-                }
-                dir('ansible/files') {
-                    sh '''
-                        chmod +x generate_inventory_from_config.sh
-                        bash generate_inventory_from_config.sh
-                    '''
-                }
                 dir('ansible') {
                     sh '''
                         ansible all -i inventory.ini -m ping
@@ -94,43 +119,16 @@ pipeline {
             }
         }
 
-        // stage('K3S Setup') {
-        //     steps {
-        //         dir('ansible') {
-        //             sh '''
-        //                 ansible-playbook -i inventory.ini playbooks/install_k3s.yml
-        //             '''
-        //         }
-        //     }
-        // }
-
-        stage('Deploy Manifests') {
+        stage('Setup K3s Cluster') {
             steps {
-                dir('ansible') {
-                    withCredentials([
-                        file(credentialsId: 'RESTORE_DUMP', variable: 'RESTORE_FILE_PATH'),
-                        file(credentialsId: 'CERT', variable: 'CERT'),
-                        file(credentialsId: 'KEY', variable: 'KEY'),
-                        string(credentialsId: 'POSTGRES_USER', variable: 'POSTGRES_USER'),
-                        string(credentialsId: 'POSTGRES_PASSWORD', variable: 'POSTGRES_PASSWORD'),
-                        string(credentialsId: 'POSTGRES_DB', variable: 'POSTGRES_DB'),
-                        string(credentialsId: 'REDIS_IMAGE', variable: 'REDIS_IMAGE'),
-                        string(credentialsId: 'BACKEND_IMAGE', variable: 'BACKEND_IMAGE'),
-                        string(credentialsId: 'FRONTEND_IMAGE', variable: 'FRONTEND_IMAGE'),
-                        string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKERHUB_USERNAME'),
-                        string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKERHUB_PASSWORD'),
-                        string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKERHUB_EMAIL')
-                    ]) { 
-                        sh '''
-                            cat $RESTORE_FILE_PATH > roles/postgres/files/restore.sql
-                            cat $CERT > roles/postgres/files/cert.pem
-                            cat $KEY > roles/postgres/files/privkey.pem
-                            ansible-playbook -i inventory.ini playbooks/deploy_manifests.yml
-                        '''
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: 'gcp-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                    sh '''
+                        ansible-playbook -i ${INVENTORY} ${WORKSPACE}/ansible/site.yml \
+                            -e ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+                    '''
                 }
             }
-        }     
+        }
 
         // stage('Deploy Services') {
         //     steps {
