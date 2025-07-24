@@ -1,0 +1,10 @@
+---
+- name: Update Helm values files for all components
+  hosts: control_plane
+  become: true
+
+  vars_files:
+    - "{{ values_file | default('values.yaml') }}"
+
+  roles:
+    - update_values

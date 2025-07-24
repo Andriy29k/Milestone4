@@ -1,0 +1,10 @@
+replicaCount: {{ replicaCount }}
+
+image:
+  repository: redis
+  tag: alpine
+  pullPolicy: IfNotPresent
+
+service:
+  type: {{ service_type }}
+  port: {{ redis_port }}

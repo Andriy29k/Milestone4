@@ -1,0 +1,23 @@
+- name: Update backend values.yaml
+  template:
+    src: backend_values.yaml.j2
+    dest: /home/andriy29k/k3s/backend/backend/values.yaml
+    mode: '0644'
+
+- name: Update frontend values.yaml
+  template:
+    src: frontend_values.yaml.j2
+    dest: /home/andriy29k/k3s/frontend/frontend/values.yaml
+    mode: '0644'
+
+- name: Update redis values.yaml
+  template:
+    src: redis_values.yaml.j2
+    dest: /home/andriy29k/k3s/redis/redis/values.yaml
+    mode: '0644'
+
+- name: Update database values.yaml
+  template:
+    src: database_values.yaml.j2
+    dest: /home/andriy29k/k3s/database/database/values.yaml
+    mode: '0644'
