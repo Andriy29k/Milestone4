@@ -15,10 +15,16 @@
   failed_when: namespace_result.rc != 0 and 'AlreadyExists' not in namespace_result.stderr
   changed_when: namespace_result.rc == 0
 
+- name: Ensure k3s/datadog directory exists
+  ansible.builtin.file:
+    path: /home/andriy29k/k3s/datadog
+    state: directory
+    mode: '0755'
+
 - name: Create Datadog Helm values file
   ansible.builtin.template:
     src: datadog-values.yaml.j2
-    dest: "/home/andriy29k/k3s/datadog/datadog-values.yaml"
+    dest: /home/andriy29k/k3s/datadog/datadog-values.yaml
     mode: '0644'
 
 - name: Deploy Datadog Helm chart
