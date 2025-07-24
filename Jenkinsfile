@@ -163,8 +163,8 @@ pipeline {
                               docker_user=${DOCKER_USER} \
                               docker_pass=${DOCKER_PASS} \
                               docker_email=${DOCKER_EMAIL} \
-                              tls_crt='${CERT}' \
-                              tls_key='${KEY}'
+                              tls_crt='${TLS_CRT}' \
+                              tls_key='${TLS_KEY}'
                         """
                     }
                 }
