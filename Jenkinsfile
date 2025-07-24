@@ -156,10 +156,12 @@ pipeline {
                     file(credentialsId: 'CERT', variable: 'TLS_CRT'),
                     file(credentialsId: 'KEY', variable: 'TLS_KEY')
                 ]) {
-                    sh '''
-                        ansible-playbook -i ansible/inventory.ini ansible/playbooks/setup_secrets.yml \
-                          --extra-vars "namespace=$K8S_NAMESPACE docker_user=$DOCKER_USER docker_pass=$DOCKER_PASS docker_email=$DOCKER_EMAIL tls_crt=$TLS_CRT tls_key=$TLS_KEY"
-                    '''
+                    dir('ansible') {
+                        sh '''
+                            ansible-playbook -i ansible/inventory.ini ansible/playbooks/setup_secrets.yml \
+                              --extra-vars "namespace=$K8S_NAMESPACE docker_user=$DOCKER_USER docker_pass=$DOCKER_PASS docker_email=$DOCKER_EMAIL tls_crt=$TLS_CRT tls_key=$TLS_KEY"
+                        '''
+                    }
                 }
             }
         }
