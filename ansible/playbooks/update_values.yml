@@ -1,7 +1,12 @@
----
 - name: Update Helm values files for all components
   hosts: control_plane
   become: true
-
+  tasks:
+    - name: Debug values file
+      debug:
+        msg: "Contents of values.yaml: {{ lookup('file', '/tmp/values.yaml') }}"
+    - name: Debug db_dump_path
+      debug:
+        msg: "db_dump_path: {{ db_dump_path }}"
   roles:
     - update_values
