@@ -203,10 +203,8 @@ pipeline {
                 ]) {
                     dir('ansible') {
                         sh '''
-                            ls -ld /tmp
                             cp -f $VALUES_FILE /tmp/values.yaml
                             chmod 666 /tmp/values.yaml
-                            ls -l /tmp/values.yaml
 
                             ansible-playbook playbooks/update_values.yml \
                                 -i inventory.ini \
