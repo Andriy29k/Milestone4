@@ -1,35 +1,46 @@
 ---
-- name: Create namespace if not exists
-  command: kubectl create namespace {{ namespace }}
-  register: ns_result
-  failed_when: ns_result.rc != 0 and 'AlreadyExists' not in ns_result.stderr
+- name: Create Kubernetes namespace if not exists
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
 
-- name: Create Docker registry secret
-  command: >
-    kubectl create secret docker-registry regcred
-    --docker-username={{ docker_user }}
-    --docker-password={{ docker_pass }}
-    --docker-email={{ docker_email }}
-    --namespace={{ namespace }}
-  register: docker_secret_result
-  failed_when: docker_secret_result.rc != 0 and 'AlreadyExists' not in docker_secret_result.stderr
+- name: Prepare Docker config JSON content
+  set_fact:
+    docker_config_json: |
+      {
+        "auths": {
+          "https://index.docker.io/v1/": {
+            "username": "{{ docker_user }}",
+            "password": "{{ docker_pass }}",
+            "email": "{{ docker_email }}",
+            "auth": "{{ (docker_user + ':' + docker_pass) | b64encode }}"
+          }
+        }
+      }
 
-- name: Save TLS cert to file
-  copy:
-    content: "{{ tls_crt }}"
-    dest: /tmp/tls.pem
+- name: Encode Docker config JSON to base64
+  set_fact:
+    docker_config_json_b64: "{{ docker_config_json | b64encode }}"
 
-- name: Save TLS key to file
-  copy:
-    content: "{{ tls_key }}"
-    dest: /tmp/tls.key
-    mode: '0600'
+- name: Encode TLS cert and key to base64
+  set_fact:
+    tls_crt_b64: "{{ tls_crt | b64encode }}"
+    tls_key_b64: "{{ tls_key | b64encode }}"
 
-- name: Create TLS secret
-  command: >
-    kubectl create secret tls tls-secret
-    --cert=/tmp/tls.pem
-    --key=/tmp/tls.key
-    --namespace={{ namespace }}
-  register: tls_secret_result
-  failed_when: tls_secret_result.rc != 0 and 'AlreadyExists' not in tls_secret_result.stderr
+- name: Create Docker registry secret YAML from template
+  template:
+    src: docker-secret.yml.j2
+    dest: /tmp/docker-secret.yml
+
+- name: Create TLS secret YAML from template
+  template:
+    src: tls-secret.yaml.j2
+    dest: /tmp/tls-secret.yaml
+
+- name: Apply Docker registry secret
+  command: kubectl apply -f /tmp/docker-secret.yaml
+
+- name: Apply TLS secret
+  command: kubectl apply -f /tmp/tls-secret.yaml
