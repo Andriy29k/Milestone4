@@ -187,7 +187,8 @@ pipeline {
                               -e github_repo_backend=${GITHUB_REPO_BACKEND} \
                               -e github_repo_frontend=${GITHUB_REPO_FRONTEND} \
                               -e github_repo_redis=${GITHUB_REPO_REDIS} \
-                              -e github_repo_database=${GITHUB_REPO_DATABASE}
+                              -e github_repo_database=${GITHUB_REPO_DATABASE} \
+                              -e ssh_key_path=${SSH_KEY}
                         """
                     }
                 }

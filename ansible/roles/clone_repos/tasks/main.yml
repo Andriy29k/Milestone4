@@ -15,7 +15,13 @@
   git:
     repo: "{{ item.repo }}"
     dest: "{{ item.dest }}"
-    version: "main"
+    version: main
     accept_hostkey: yes
     update: yes
-  loop: "{{ repos }}"
+    key_file: "{{ ssh_key_path | default(omit) }}"
+  with_items:
+    - { name: "Backend",  repo: "{{ github_repo_backend }}",  dest: "~/k3s/backend" }
+    - { name: "Frontend", repo: "{{ github_repo_frontend }}", dest: "~/k3s/frontend" }
+    - { name: "Redis",    repo: "{{ github_repo_redis }}",    dest: "~/k3s/redis" }
+    - { name: "Postgres", repo: "{{ github_repo_database }}", dest: "~/k3s/database" }
+
