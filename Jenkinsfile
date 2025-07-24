@@ -150,9 +150,10 @@ pipeline {
         stage('Setup Secrets') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'K8S-NAMESPACE', variable: 'K8S_NAMESPACE'),
-                    usernamePassword(credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS'),
-                    string(credentialsId: 'DOCKER-EMAIL', variable: 'DOCKER_EMAIL'),
+                    string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE'),
+                    string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKER_USER'),
+                    string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKER_PASS'),
+                    string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKER_EMAIL'),
                     file(credentialsId: 'CERT', variable: 'TLS_CRT'),
                     file(credentialsId: 'KEY', variable: 'TLS_KEY')
                 ]) {
