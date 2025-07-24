@@ -216,18 +216,30 @@ pipeline {
         //     }
         // }
 
-        stage('Deploy App with Helm') {
-            steps {
-                dir('ansible') {
-                    withCredentials([string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE')]) {
-                        sh '''
-                            ansible-playbook playbooks/deploy_app.yml \
-                              -i inventory.ini \
-                              -e "namespace=${K8S_NAMESPACE}"
-                        '''
-                    }
-                }
+        // stage('Deploy App with Helm') {
+        //     steps {
+        //         dir('ansible') {
+        //             withCredentials([string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE')]) {
+        //                 sh '''
+        //                     ansible-playbook playbooks/deploy_app.yml \
+        //                       -i inventory.ini \
+        //                       -e "namespace=${K8S_NAMESPACE}"
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
+        stage('Deploy Datadog Agent') {
+          steps {
+            withCredentials([string(credentialsId: 'DATADOG_API_KEY', variable: 'DATADOG_API_KEY'),
+                            string(credentialsId: 'DATADOG_APP_KEY', variable: 'DATADOG_APP_KEY')]) {
+              dir('ansible') {
+                sh '''
+                    ansible-playbook -i inventory.ini playbooks/deploy_datadog.yaml
+                '''
+              }
             }
+          }
         }
     }
 }

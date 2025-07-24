@@ -1,0 +1,7 @@
+namespace: monitoring
+release_name: datadog
+chart_version: 3.1.0
+datadog_api_key: "{{ lookup('jenkins', 'DATADOG_API_KEY', scope='global') }}"
+datadog_app_key: "{{ lookup('jenkins', 'DATADOG_APP_KEY', scope='global') }}"
+cluster_name: default
+ingress_hostname: monitoring.class-schedule-app.pp.ua

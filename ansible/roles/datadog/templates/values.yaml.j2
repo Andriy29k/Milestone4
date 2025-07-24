@@ -1,0 +1,33 @@
+datadog:
+  apiKey: "{{ datadog_api_key }}"
+  appKey: "{{ datadog_app_key }}"
+  clusterName: "{{ cluster_name }}"
+  logs:
+    enabled: true
+    containerCollectAll: true
+  metrics:
+    enabled: true
+  apm:
+    enabled: true
+  processAgent:
+    enabled: true
+  clusterAgent:
+    enabled: true
+    metricsProvider:
+      enabled: true
+  kubeStateMetrics:
+    enabled: true
+  networkMonitoring:
+    enabled: true
+  securityMonitoring:
+    enabled: true
+ingress:
+  enabled: true
+  hosts:
+    - host: "{{ ingress_hostname }}"
+      paths:
+        - path: /
+          pathType: Prefix
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
