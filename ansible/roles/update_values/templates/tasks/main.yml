@@ -21,3 +21,15 @@
     src: database_values.yaml.j2
     dest: /home/andriy29k/k3s/database/database/values.yaml
     mode: '0644'
+
+- name: Ensure files directory exists for database
+  file:
+    path: "/root/k3s/database/database/files"
+    state: directory
+    mode: '0755'
+
+- name: Copy DB dump to files directory
+  copy:
+    src: "{{ db_dump_path }}"
+    dest: "/root/k3s/database/database/files/init.sql"
+    mode: '0644'

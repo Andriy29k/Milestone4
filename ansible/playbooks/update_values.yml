@@ -4,7 +4,10 @@
   become: true
 
   vars_files:
-    - "{{ values_file | default('values.yaml') }}"
+    - "{{ values_file | default('') }}"
+
+  vars:
+    db_dump_path: "{{ db_dump_path | default('') }}"
 
   roles:
     - update_values

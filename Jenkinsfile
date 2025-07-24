@@ -195,15 +195,19 @@ pipeline {
             }
         }
 
-        stage('Update values') {
-            steps {
-                dir('ansible') {
-                    withCredentials([file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE')
-                    ]) {
+    stage('Update values & put restore file') {
+        steps {
+            dir('ansible') {
+                withCredentials([
+                    file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
+                    file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
+                ]) {
                         sh """
-                            ansible-playbook -i inventory.ini playbooks/update_values.yml -e "@${VALUES_FILE}" 
+                            ansible-playbook -i inventory.ini playbooks/update_values.yml \
+                                -e "@${VALUES_FILE}" \
+                                -e db_dump_path=${DB_DUMP_FILE}
                         """
-                    }
+                    } 
                 }
             }
         }
