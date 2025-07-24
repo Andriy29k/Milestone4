@@ -203,31 +203,11 @@ pipeline {
                 ]) {
                     dir('ansible') {
                         sh '''
-                            # Перевіряємо права доступу до файлів
-                            echo "VALUES_FILE path: $VALUES_FILE"
-                            ls -l $VALUES_FILE
-                            echo "DB_DUMP_FILE path: $DB_DUMP_FILE"
-                            ls -l $DB_DUMP_FILE
-                            
-                            # Перевіряємо права на /tmp
                             ls -ld /tmp
-                            
-                            # Копіюємо VALUES_FILE у /tmp
                             cp -f $VALUES_FILE /tmp/values.yaml
-                            
-                            # Надаємо права на запис (про всяк випадок)
                             chmod 666 /tmp/values.yaml
-                            
-                            # Перевіряємо створений файл
                             ls -l /tmp/values.yaml
-                            
-                            # Перевіряємо наявність inventory.ini
-                            if [ ! -f inventory.ini ]; then
-                                echo "Error: inventory.ini not found!"
-                                exit 1
-                            fi
-                            
-                            # Запускаємо Ansible playbook
+
                             ansible-playbook playbooks/update_values.yml \
                                 -i inventory.ini \
                                 -e @/tmp/values.yaml \
