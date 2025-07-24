@@ -197,11 +197,11 @@ pipeline {
 
     stage('Update values & put restore file') {
         steps {
-            dir('ansible') {
-                withCredentials([
-                    file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
-                    file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
-                ])  {
+            withCredentials([
+                file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
+                file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
+            ])  {
+                    dir('ansible') {
                         sh '''
                             cp $VALUES_FILE ./values.yaml
                             cp $DB_DUMP_FILE ./dump.sql
@@ -210,8 +210,8 @@ pipeline {
                               -e @values.yaml \
                               -e db_dump_path=./dump.sql
                         '''
-                    } 
-                }
+                    }
+                } 
             }
         }
     }
