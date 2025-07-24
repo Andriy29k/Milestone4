@@ -1,10 +1,15 @@
 ---
-- name: Create Kubernetes namespace if not exists
-  kubernetes.core.k8s:
-    api_version: v1
-    kind: Namespace
-    name: "{{ namespace }}"
-    state: present
+- name: Create namespace manifest
+  copy:
+    content: |
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ namespace }}"
+    dest: /tmp/namespace.yaml
+
+- name: Apply namespace manifest
+  shell: kubectl apply -f /tmp/namespace.yaml
 
 - name: Prepare Docker config JSON content
   set_fact:
@@ -40,7 +45,7 @@
     dest: /tmp/tls-secret.yaml
 
 - name: Apply Docker registry secret
-  command: kubectl apply -f /tmp/docker-secret.yaml
+  shell: kubectl apply -f /tmp/docker-secret.yaml
 
 - name: Apply TLS secret
-  command: kubectl apply -f /tmp/tls-secret.yaml
+  shell: kubectl apply -f /tmp/tls-secret.yaml
