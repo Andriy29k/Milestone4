@@ -157,10 +157,15 @@ pipeline {
                     file(credentialsId: 'KEY', variable: 'TLS_KEY')
                 ]) {
                     dir('ansible') {
-                        sh '''
+                        sh """
                             ansible-playbook -i inventory.ini playbooks/setup_secrets.yml \
-                              --extra-vars "namespace=$K8S_NAMESPACE docker_user=$DOCKER_USER docker_pass=$DOCKER_PASS docker_email=$DOCKER_EMAIL tls_crt=$TLS_CRT tls_key=$TLS_KEY"
-                        '''
+                              --extra-vars namespace=${K8S_NAMESPACE} \
+                              docker_user=${DOCKER_USER} \
+                              docker_pass=${DOCKER_PASS} \
+                              docker_email=${DOCKER_EMAIL} \
+                              tls_crt='${CERT}' \
+                              tls_key='${KEY}'
+                        """
                     }
                 }
             }

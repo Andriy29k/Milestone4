@@ -1,18 +1,40 @@
-- name: Create namespace if not exists
-  command: >
-    kubectl create namespace {{ namespace }}
+---
+- name: Create Kubernetes namespace and secrets
+  hosts: control_plane
+  become: true
+  tasks:
 
-- name: Create Docker registry secret
-  command: >
-    kubectl create secret docker-registry regcred
-      --docker-username={{ docker_user }}
-      --docker-password={{ docker_pass }}
-      --docker-email={{ docker_email }}
-      --namespace={{ namespace }}
+    - name: Create namespace if not exists
+      command: kubectl create namespace {{ namespace }}
+      register: ns_result
+      failed_when: ns_result.rc != 0 and 'AlreadyExists' not in ns_result.stderr
 
-- name: Create TLS secret
-  command: >
-    kubectl create secret tls tls-secret
-    --cert={{ tls_crt }}
-    --key={{ tls_key }}
-    --namespace={{ namespace }}
+    - name: Create Docker registry secret
+      command: >
+        kubectl create secret docker-registry regcred
+        --docker-username={{ docker_user }}
+        --docker-password={{ docker_pass }}
+        --docker-email={{ docker_email }}
+        --namespace={{ namespace }}
+      register: docker_secret_result
+      failed_when: docker_secret_result.rc != 0 and 'AlreadyExists' not in docker_secret_result.stderr
+
+    - name: Save TLS cert to file
+      copy:
+        content: "{{ tls_crt }}"
+        dest: /tmp/tls.pem
+
+    - name: Save TLS key to file
+      copy:
+        content: "{{ tls_key }}"
+        dest: /tmp/tls.key
+        mode: '0600'
+
+    - name: Create TLS secret
+      command: >
+        kubectl create secret tls tls-secret
+        --cert=/tmp/tls.key
+        --key=/tmp/tls.key
+        --namespace={{ namespace }}
+      register: tls_secret_result
+      failed_when: tls_secret_result.rc != 0 and 'AlreadyExists' not in tls_secret_result.stderr
