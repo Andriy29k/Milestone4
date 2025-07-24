@@ -147,30 +147,30 @@ pipeline {
         //     }
         // }
 
-        stage('Setup Secrets') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE'),
-                    string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKER_USER'),
-                    string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKER_PASS'),
-                    string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKER_EMAIL'),
-                    file(credentialsId: 'CERT', variable: 'TLS_CRT'),
-                    file(credentialsId: 'KEY', variable: 'TLS_KEY')
-                ]) {
-                    dir('ansible') {
-                       sh """
-                        ansible-playbook -i inventory.ini playbooks/setup_secrets.yml \
-                          -e namespace=${K8S_NAMESPACE} \
-                          -e docker_user=${DOCKER_USER} \
-                          -e docker_pass=${DOCKER_PASS} \
-                          -e docker_email=${DOCKER_EMAIL} \
-                          -e tls_crt='${TLS_CRT}' \
-                          -e tls_key='${TLS_KEY}'
-                        """
-                    }
-                }
-            }
-        }
+        // stage('Setup Secrets') {
+        //     steps {
+        //         withCredentials([
+        //             string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE'),
+        //             string(credentialsId: 'DOCKERHUB_USERNAME', variable: 'DOCKER_USER'),
+        //             string(credentialsId: 'DOCKERHUB_PASSWORD', variable: 'DOCKER_PASS'),
+        //             string(credentialsId: 'DOCKERHUB_EMAIL', variable: 'DOCKER_EMAIL'),
+        //             file(credentialsId: 'CERT', variable: 'TLS_CRT'),
+        //             file(credentialsId: 'KEY', variable: 'TLS_KEY')
+        //         ]) {
+        //             dir('ansible') {
+        //                sh """
+        //                 ansible-playbook -i inventory.ini playbooks/setup_secrets.yml \
+        //                   -e namespace=${K8S_NAMESPACE} \
+        //                   -e docker_user=${DOCKER_USER} \
+        //                   -e docker_pass=${DOCKER_PASS} \
+        //                   -e docker_email=${DOCKER_EMAIL} \
+        //                   -e tls_crt='${TLS_CRT}' \
+        //                   -e tls_key='${TLS_KEY}'
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
         
         stage('Clone Repositories') {
             steps {
