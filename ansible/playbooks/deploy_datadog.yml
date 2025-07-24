@@ -1,5 +1,5 @@
 - name: Deploy Datadog Monitoring with Helm
-  hosts: control-plane
+  hosts: control_plane
   become: true
   roles:
     - datadog
