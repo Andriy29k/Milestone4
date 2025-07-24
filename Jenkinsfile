@@ -127,25 +127,25 @@ pipeline {
             }
         }
 
-        stage('Setup K3S') {
-            steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i ${INVENTORY} playbooks/setup_k3s.yml
-                    '''
-                }
-            }
-        }
+        // stage('Setup K3S') {
+        //     steps {
+        //         dir('ansible') {
+        //             sh '''
+        //                 ansible-playbook -i ${INVENTORY} playbooks/setup_k3s.yml
+        //             '''
+        //         }
+        //     }
+        // }
 
-        stage('Setup Helm') {
-            steps {
-                dir('ansible') {
-                    sh '''
-                        ansible-playbook -i ${INVENTORY} playbooks/setup_helm.yml
-                    '''
-                }
-            }
-        }
+        // stage('Setup Helm') {
+        //     steps {
+        //         dir('ansible') {
+        //             sh '''
+        //                 ansible-playbook -i ${INVENTORY} playbooks/setup_helm.yml
+        //             '''
+        //         }
+        //     }
+        // }
 
         stage('Setup Secrets') {
             steps {
