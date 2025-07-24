@@ -25,9 +25,10 @@
         }
       }
 
+
 - name: Encode Docker config JSON to base64
   set_fact:
-    docker_config_json_b64: "{{ docker_config_json | b64encode }}"
+    docker_config_json_b64: "{{ docker_config_json | to_nice_json | b64encode }}"
 
 - name: Encode TLS cert and key to base64
   set_fact:
