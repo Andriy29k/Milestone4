@@ -202,14 +202,14 @@ pipeline {
                     file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
                     file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
                 ])  {
-                        sh """
-                            cp ${VALUES_FILE} ./values.yaml
-                            cp ${DB_DUMP_FILE} ./dump.sql
-
-                            ansible-playbook -i inventory.ini playbooks/update_values.yml \
-                              -e "@values.yaml" \
+                        sh '''
+                            cp $VALUES_FILE ./values.yaml
+                            cp $DB_DUMP_FILE ./dump.sql
+                            ansible-playbook playbooks/update_values.yml \
+                              -i inventory.ini \
+                              -e @values.yaml \
                               -e db_dump_path=./dump.sql
-                        """
+                        '''
                     } 
                 }
             }
