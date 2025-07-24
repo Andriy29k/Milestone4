@@ -36,8 +36,8 @@
 
 - name: Create Docker registry secret YAML from template
   template:
-    src: docker-secret.yml.j2
-    dest: /tmp/docker-secret.yml
+    src: docker-secret.yaml.j2
+    dest: /tmp/docker-secret.yaml
 
 - name: Create TLS secret YAML from template
   template:
