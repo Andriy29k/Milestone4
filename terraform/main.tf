@@ -99,7 +99,7 @@ module "ssh_config" {
     }
   )
 
-  reverse_proxy_ip = module.control_plane.control_plane_internal_ip
+  control_plane_ip = module.control_plane.control_plane_internal_ip
   database_ip      = module.database.database_internal_ip
 
   ssh_user                      = var.ssh_user

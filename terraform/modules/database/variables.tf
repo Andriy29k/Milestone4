@@ -1,7 +1,7 @@
- variable "zone" {
+variable "zone" {
   description = "The zone in which resources will be created"
-  type        = string   
- }
+  type        = string
+}
 
 variable "db_machine_type" {
   description = "The type of machine to create"
@@ -10,16 +10,16 @@ variable "db_machine_type" {
 
 variable "image" {
   description = "The image to use for the boot disk"
-  type        = string  
+  type        = string
 }
 
 variable "size" {
   description = "The size of the boot disk in GB"
-  type        = number  
+  type        = number
 }
 
 variable "ssh_path_over_bastion" {
-  type    = string
+  type = string
 }
 
 variable "ssh_user" {

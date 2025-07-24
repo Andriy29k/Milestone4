@@ -13,7 +13,7 @@ resource "google_compute_instance" "database" {
   metadata = {
     ssh-keys = "${var.ssh_user}:${chomp(file(var.ssh_path_over_bastion))}"
   }
-  
+
   network_interface {
     subnetwork = var.private_subnet_name
   }

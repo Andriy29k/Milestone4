@@ -1,5 +1,5 @@
 variable "vpc_name" {
-  type    = string
+  type = string
 }
 
 variable "project_id" {
@@ -11,13 +11,13 @@ variable "zone" {
 }
 
 variable "region" {
-  type    = string
+  type = string
 }
 
 variable "public_subnet_cidr" {
-  type    = string
+  type = string
 }
 
 variable "private_subnet_cidr" {
-  type    = string
+  type = string
 }
