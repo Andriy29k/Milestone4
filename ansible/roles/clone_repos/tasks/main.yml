@@ -24,4 +24,3 @@
     - { name: "Frontend", repo: "{{ github_repo_frontend }}", dest: "~/k3s/frontend" }
     - { name: "Redis",    repo: "{{ github_repo_redis }}",    dest: "~/k3s/redis" }
     - { name: "Postgres", repo: "{{ github_repo_database }}", dest: "~/k3s/database" }
-
