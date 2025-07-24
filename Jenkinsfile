@@ -205,7 +205,7 @@ pipeline {
                         sh '''
                             cp $VALUES_FILE /tmp/values.yaml
                             cp $DB_DUMP_FILE /tmp/dump.sql
-                            ansible-playbook ansible/playbooks/update_values.yml \
+                            ansible-playbook playbooks/update_values.yml \
                               -i ansible/inventory.ini \
                               -e @/tmp/values.yaml \
                               -e db_dump_path=/tmp/dump.sql
