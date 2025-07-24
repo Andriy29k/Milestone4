@@ -2,4 +2,4 @@
   hosts: control_plane
   become: true
   roles:
-    - datadog
+    - datadog-monitoring
