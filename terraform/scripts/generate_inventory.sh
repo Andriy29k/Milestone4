@@ -8,7 +8,7 @@ declare -A group_map=(
   ["backend"]="worker_group"
   ["frontend"]="worker_group"
   ["monitoring"]="worker_group"
-  ["control-plane"]="control_plane_group"
+  ["control_plane"]="control_plane_group"
   ["database"]="worker_group"
 )
 
