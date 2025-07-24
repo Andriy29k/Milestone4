@@ -160,7 +160,7 @@ pipeline {
                     dir('ansible') {
                        sh """
                         ansible-playbook -i inventory.ini playbooks/setup_secrets.yml \
-                          -e namespace=${K8S-NAMESPACE} \
+                          -e namespace=${K8S_NAMESPACE} \
                           -e docker_user=${DOCKER_USER} \
                           -e docker_pass=${DOCKER_PASS} \
                           -e docker_email=${DOCKER_EMAIL} \
