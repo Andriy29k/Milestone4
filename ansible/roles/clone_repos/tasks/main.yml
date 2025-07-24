@@ -7,7 +7,7 @@
 
 - name: Ensure k3s directory exists
   file:
-    path: "~/k3s"
+    path: "{{ ansible_env.HOME }}/k3s"
     state: directory
     mode: '0755'
 
@@ -27,13 +27,13 @@
 - name: Clone or update repositories
   git:
     repo: "{{ item.repo }}"
-    dest: "{{ item.dest }}"
+    dest: "{{ ansible_env.HOME }}/k3s/{{ item.name | lower }}"
     version: main
     accept_hostkey: yes
     update: yes
     key_file: "~/.ssh/id_rsa"
   with_items:
-    - { name: "Backend",  repo: "{{ github_repo_backend }}",  dest: "~/k3s/backend" }
-    - { name: "Frontend", repo: "{{ github_repo_frontend }}", dest: "~/k3s/frontend" }
-    - { name: "Redis",    repo: "{{ github_repo_redis }}",    dest: "~/k3s/redis" }
-    - { name: "Postgres", repo: "{{ github_repo_database }}", dest: "~/k3s/database" }
+    - { name: "backend",  repo: "{{ github_repo_backend }}" }
+    - { name: "frontend", repo: "{{ github_repo_frontend }}" }
+    - { name: "redis",    repo: "{{ github_repo_redis }}" }
+    - { name: "database", repo: "{{ github_repo_database }}" }
