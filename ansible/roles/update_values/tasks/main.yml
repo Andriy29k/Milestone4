@@ -12,7 +12,7 @@
 
 - name: Update redis values.yaml
   template:
-    src: reids_values.yaml.j2
+    src: redis_values.yaml.j2
     dest: /home/andriy29k/k3s/redis/redis/values.yaml
     mode: '0644'
 
