@@ -205,7 +205,7 @@ pipeline {
                     sh '''
                         cat $VALUES_FILE | ansible-playbook playbooks/update_values.yml \
                           -i inventory.ini \
-                          -e @- \
+                          -e @/dev/stdin \
                           -e db_dump_path=$DB_DUMP_FILE
                         '''                
                     }
