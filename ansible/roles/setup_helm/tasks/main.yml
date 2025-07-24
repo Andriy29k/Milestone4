@@ -1,17 +1,20 @@
 ---
+- name: Download Helm installation script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: '0755'
+
 - name: Install Helm
-  shell: |
-    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | HELM_INSTALL_DIR=/usr/local/bin bash
+  ansible.builtin.shell: /tmp/get_helm.sh
   args:
     creates: /usr/local/bin/helm
-  environment:
-    DESIRED_VERSION: "{{ helm_version }}"
 
-- name: Create namespace
-  kubernetes.core.k8s:
-    api_version: v1
-    kind: Namespace
-    name: "{{ namespace }}"
-    state: present
-  environment:
-    KUBECONFIG: "{{ ansible_env.HOME }}/.kube/config"
+- name: Check Helm version
+  ansible.builtin.command: helm version
+  register: helm_version
+  changed_when: false
+
+- name: Show Helm version
+  ansible.builtin.debug:
+    msg: "Helm installed successfully: {{ helm_version.stdout }}"

@@ -1,5 +1,11 @@
 - name: Setup K3s Cluster
   hosts: all
-  become: yes
+  become: true
   roles:
     - k3s
+
+- name: Install Helm on control plane
+  hosts: control_plane
+  become: true
+  roles:
+    - setup_helm
