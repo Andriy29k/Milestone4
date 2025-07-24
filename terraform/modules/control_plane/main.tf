@@ -1,4 +1,4 @@
-resource "google_compute_instance" "reverse_proxy" {
+resource "google_compute_instance" "control_plane" {
   name         = "control-plane"
   machine_type = var.machine_type
   zone         = var.zone
