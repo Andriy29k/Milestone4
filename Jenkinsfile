@@ -122,9 +122,7 @@ pipeline {
         stage('Ansible inventory generation') {
             steps {
                 dir('ansible') {
-                    sh '''
-                        ansible all -i inventory.ini -m ping
-                    '''
+                    sh 'ansible all -i ${INVENTORY} -m ping -vvv' 
                 }
             }
         }
