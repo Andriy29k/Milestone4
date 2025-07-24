@@ -183,8 +183,11 @@ pipeline {
                 ]) {
                     dir('ansible') {
                         sh """
-                            export GIT_SSH_COMMAND='ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no'
-                            ansible-playbook -i inventory.ini playbooks/clone_repos.yml -vvv
+                            ansible-playbook -i inventory.ini playbooks/clone_repos.yml \
+                              -e github_repo_backend=${GITHUB_REPO_BACKEND} \
+                              -e github_repo_frontend=${GITHUB_REPO_FRONTEND} \
+                              -e github_repo_redis=${GITHUB_REPO_REDIS} \
+                              -e github_repo_database=${GITHUB_REPO_DATABASE}
                         """
                     }
                 }
