@@ -176,9 +176,9 @@ pipeline {
             steps {
                 withCredentials([
                     sshUserPrivateKey(credentialsId: 'GITHUB_SSH_KEY', keyFileVariable: 'SSH_KEY'),
-                    string(credentialsId: 'GITHUB_REPO_REDIS', variable: 'GITHUB_REPO_REDIS')
-                    string(credentialsId: 'GITHUB_REPO_DATABASE', variable: 'GITHUB_REPO_DATABASE')
-                    string(credentialsId: 'GITHUB_REPO_FRONTEND', variable: 'GITHUB_REPO_FRONTEND')
+                    string(credentialsId: 'GITHUB_REPO_REDIS', variable: 'GITHUB_REPO_REDIS'),
+                    string(credentialsId: 'GITHUB_REPO_DATABASE', variable: 'GITHUB_REPO_DATABASE'),
+                    string(credentialsId: 'GITHUB_REPO_FRONTEND', variable: 'GITHUB_REPO_FRONTEND'),
                     string(credentialsId: 'GITHUB_REPO_BACKEND', variable: 'GITHUB_REPO_BACKEND')
                 ]) {
                     dir('ansible') {
