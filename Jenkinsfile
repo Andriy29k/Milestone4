@@ -195,23 +195,34 @@ pipeline {
         //     }
         // }
 
-        stage('Update values & put restore file') {
-            steps {
-                withCredentials([
-                    file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
-                    file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
-                ]) {
-                    dir('ansible') {
-                        sh '''
-                            cp -f $VALUES_FILE /tmp/values.yaml
-                            chmod 666 /tmp/values.yaml
+        // stage('Update values & put restore file') {
+        //     steps {
+        //         withCredentials([
+        //             file(credentialsId: 'VALUES_FILE', variable: 'VALUES_FILE'),
+        //             file(credentialsId: 'RESTORE_DUMP', variable: 'DB_DUMP_FILE')
+        //         ]) {
+        //             dir('ansible') {
+        //                 sh '''
+        //                     cp -f $VALUES_FILE /tmp/values.yaml
+        //                     chmod 666 /tmp/values.yaml
 
-                            ansible-playbook playbooks/update_values.yml \
-                                -i inventory.ini \
-                                -e @/tmp/values.yaml \
-                                -e db_dump_path=$DB_DUMP_FILE
-                        '''
-                    }
+        //                     ansible-playbook playbooks/update_values.yml \
+        //                         -i inventory.ini \
+        //                         -e @/tmp/values.yaml \
+        //                         -e db_dump_path=$DB_DUMP_FILE
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Deploy App with Helm') {
+            steps {
+                dir('ansible') {
+                    sh '''
+                        ansible-playbook playbooks/deploy_app.yml \
+                          -i inventory.ini
+                    '''
                 }
             }
         }

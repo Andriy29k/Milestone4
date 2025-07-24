@@ -1,0 +1,6 @@
+---
+- name: Deploy Class Schedule Application via Helm
+  hosts: control_plane
+  become: true
+  roles:
+    - deploy_app

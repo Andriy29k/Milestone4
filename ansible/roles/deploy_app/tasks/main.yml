@@ -1,0 +1,75 @@
+---
+- name: Ensure Helm namespace exists
+  command: >
+    kubectl --kubeconfig={{ kubeconfig_path }} create namespace {{ helm_namespace }}
+  register: ns_result
+  failed_when: ns_result.rc != 0 and "AlreadyExists" not in ns_result.stderr
+  changed_when: "'AlreadyExists' not in ns_result.stderr"
+
+- name: Deploy Database (Postgres)
+  community.kubernetes.helm:
+    name: database
+    chart_path: "{{ helm_charts_base }}/database/database"
+    namespace: "{{ helm_namespace }}"
+    kubeconfig: "{{ kubeconfig_path }}"
+    values_files:
+      - "{{ helm_charts_base }}/database/database/values.yaml"
+    create_namespace: false
+  register: postgres_result
+
+- name: Wait for Postgres Pod to be ready
+  command: >
+    kubectl --kubeconfig={{ kubeconfig_path }} -n {{ helm_namespace }}
+    rollout status statefulset database --timeout=180s
+  when: postgres_result is succeeded
+
+- name: Deploy Redis
+  community.kubernetes.helm:
+    name: redis
+    chart_path: "{{ helm_charts_base }}/redis/redis"
+    namespace: "{{ helm_namespace }}"
+    kubeconfig: "{{ kubeconfig_path }}"
+    values_files:
+      - "{{ helm_charts_base }}/redis/redis/values.yaml"
+    create_namespace: false
+  register: redis_result
+
+- name: Wait for Redis Pod to be ready
+  command: >
+    kubectl --kubeconfig={{ kubeconfig_path }} -n {{ helm_namespace }}
+    rollout status deployment redis --timeout=120s
+  when: redis_result is succeeded
+
+- name: Deploy Backend
+  community.kubernetes.helm:
+    name: backend
+    chart_path: "{{ helm_charts_base }}/backend/backend"
+    namespace: "{{ helm_namespace }}"
+    kubeconfig: "{{ kubeconfig_path }}"
+    values_files:
+      - "{{ helm_charts_base }}/backend/backend/values.yaml"
+    create_namespace: false
+  register: backend_result
+
+- name: Wait for Backend Pod to be ready
+  command: >
+    kubectl --kubeconfig={{ kubeconfig_path }} -n {{ helm_namespace }}
+    rollout status deployment backend --timeout=180s
+  when: backend_result is succeeded
+
+- name: Deploy Frontend
+  community.kubernetes.helm:
+    name: frontend
+    chart_path: "{{ helm_charts_base }}/frontend/frontend"
+    namespace: "{{ helm_namespace }}"
+    kubeconfig: "{{ kubeconfig_path }}"
+    values_files:
+      - "{{ helm_charts_base }}/frontend/frontend/values.yaml"
+    create_namespace: false
+  register: frontend_result
+
+- name: Wait for Frontend Pod to be ready
+  command: >
+    kubectl --kubeconfig={{ kubeconfig_path }} -n {{ helm_namespace }}
+    rollout status deployment frontend --timeout=180s
+  when: frontend_result is succeeded

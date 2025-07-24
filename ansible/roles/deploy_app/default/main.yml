@@ -1,0 +1,3 @@
+helm_namespace: class-schedule
+kubeconfig_path: /etc/rancher/k3s/k3s.yaml
+helm_charts_base: /home/andriy29k/k3s
