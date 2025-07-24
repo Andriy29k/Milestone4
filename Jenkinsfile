@@ -219,10 +219,12 @@ pipeline {
         stage('Deploy App with Helm') {
             steps {
                 dir('ansible') {
-                    sh '''
-                        ansible-playbook playbooks/deploy_app.yml \
-                          -i inventory.ini
-                    '''
+                    withCredentials([string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE')]) {
+                        sh '''
+                            ansible-playbook playbooks/deploy_app.yml \
+                              -i inventory.ini
+                        '''
+                    }
                 }
             }
         }
