@@ -1,0 +1,7 @@
+- name: Install K3s control plane on control-plane group
+  include_tasks: control-plane.yml
+  when: "'control_plane_group' in group_names"
+
+- name: Install K3s workers
+  include_tasks: workers.yml
+  when: "'worker_group' in group_names"

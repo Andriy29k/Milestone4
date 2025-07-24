@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: andriy29k/class_schedule_frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 3000
+env:
+  BACKEND_URL: https://api.class-schedule-app.pp.ua
+ingress:
+  enabled: true
+  host: class-schedule-app.pp.ua
+  path: /
+  pathType: Prefix
+  entryPoint: websecure
+  tls:
+    enabled: true
+    secretName: "{{ tls_secret_name }}"
+imagePullSecrets:
+  - name: "{{ registry_secret_name }}"

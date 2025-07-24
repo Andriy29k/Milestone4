@@ -1,0 +1,68 @@
+---
+- name: Clone Backend chart repository
+  git:
+    repo: "{{ github_repo_backend }}"
+    dest: ~/k3s
+    version: main
+
+- name: Clone Frontend chart repository
+  git:
+    repo: "{{ github_repo_frontend }}"
+    dest: ~/k3s
+    version: main
+
+- name: Clone Redis chart repository
+  git:
+    repo: "{{ github_repo_redis }}"
+    dest: ~/k3s
+    version: main
+
+- name: Clone Postgres chart repository
+  git:
+    repo: "{{ github_repo_database }}"
+    dest: ~/k3s
+    version: main
+
+- name: Generate frontend values file
+  template:
+    src: frontend-values.yaml.j2
+    dest: ~/k3s/frontend/values.yaml
+    mode: '0644'
+    force: true
+
+- name: Generate backend values file
+  template:
+    src: backend-values.yaml.j2
+    dest: ~/k3s/frontend/values.yaml
+    mode: '0644'
+    force: true
+
+- name: Generate postgres values file
+  template:
+    src: postgres-values.yaml.j2
+    dest: ~/k3s/database/values.yaml
+    mode: '0644'
+    force: true
+
+- name: Generate redis values file
+  template:
+    src: redis-values.yaml.j2
+    dest: ~/k3s/redis/values.yaml
+    mode: '0644'
+    force: true
+
+- name: Install Helm charts
+  kubernetes.core.helm:
+    name: "{{ item }}"
+    chart_ref: "~/k3s/{{ item }}"
+    release_namespace: "{{ namespace }}"
+    values_files:
+      - "/k3s/{{ item }}/values.yaml"
+    state: present
+  loop:
+    - redis
+    - postgres
+    - backend
+    - frontend
+  environment:
+    KUBECONFIG: "{{ ansible_env.HOME }}/.kube/config"

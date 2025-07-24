@@ -1,3 +1,0 @@
----
-k3s_role: agent
-k3s_server_url: "https://{{ hostvars[groups['control_plane_group'][0]]['ansible_host'] }}:6443"

@@ -1,0 +1,24 @@
+replicaCount: 1
+image:
+  repository: andriy29k/class_schedule_backend
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 8080
+env:
+  DB_ENDPOINT_TOKEN: jdbc:postgresql://postgres:5432/class_schedule
+  DB_USERNAME_TOKEN: "{{ DB_USERNAME }}"
+  DB_USERPASSWORD_TOKEN: "{{ DB_PASSWORD }}"
+  REDIS_URL: redis://redis:6379
+ingress:
+  enabled: true
+  host: api.class-schedule-app.pp.ua
+  path: /
+  pathType: Prefix
+  entryPoint: websecure
+  tls:
+    enabled: true
+    secretName: "{{ tls_secret_name }}"
+imagePullSecrets:
+  - name: "{{ registry_secret_name }}"
