@@ -94,7 +94,7 @@ module "ssh_config" {
   machine_private_ips = merge(
     module.compute.all_internal_ips,
     {
-      reverse_proxy = module.control_plane.control_plane_internal_ip,
+      control_plane = module.control_plane.control_plane_internal_ip,
       database      = module.database.database_internal_ip,
     }
   )
