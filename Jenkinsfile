@@ -184,7 +184,7 @@ pipeline {
                     dir('ansible') {
                         sh """
                             export GIT_SSH_COMMAND='ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no'
-                            ansible-playbook -i inventory.ini playbooks/clone_repos.yml
+                            ansible-playbook -i inventory.ini playbooks/clone_repos.yml -vvv
                         """
                     }
                 }
