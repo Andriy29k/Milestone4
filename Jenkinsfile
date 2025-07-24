@@ -129,12 +129,9 @@ pipeline {
 
         stage('Setup K3s Cluster') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'GCP_CREDS_JSON')]) {
-                    sh '''
-                        ansible-playbook -i ${INVENTORY} ${WORKSPACE}/ansible/site.yml \
-                            -e ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-                    '''
-                }
+                sh '''
+                    ansible-playbook -i ${INVENTORY} ${WORKSPACE}/ansible/site.yml
+                '''              
             }
         }
     }
