@@ -35,7 +35,7 @@ pipeline {
             } 
         }
 
-        stage('Docker images build') {
+        stage('Docker, frontend image build') {
             steps {
                 dir('frontend') {
                     script {
@@ -83,29 +83,6 @@ pipeline {
         //         }
         //     }
         // }
-
-        stage('Docker images build') {
-            steps {
-                dir('frontend/frontend') {
-                   sh '''
-                        mkdir -p ../build
-                        tar -xzf frontend-artifact.tar.gz -C ../build/
-                        rm -rf build
-                    '''
-                }
-                withCredentials([usernamePassword(
-                        credentialsId: 'DOCKERHUB_CREDENTIALS', 
-                        usernameVariable: 'DOCKERHUB_USERNAME', 
-                        passwordVariable: 'DOCKERHUB_PASSWORD'
-                )]) {
-                    dir('frontend') {
-                        sh 'echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin'
-                        sh "docker build --no-cache -t $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG ."
-                        sh "docker push $DOCKERHUB_USERNAME/$FRONTEND_IMAGE_NAME:$IMAGE_TAG"
-                    }
-                }
-            }
-        }
 
         // stage('Backend image build') {
         //     steps {
