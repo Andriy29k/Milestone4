@@ -203,11 +203,18 @@ pipeline {
             ]) {
                 dir('ansible'){
                     sh '''
-                        cat $VALUES_FILE | ansible-playbook playbooks/update_values.yml \
-                          -i inventory.ini \
-                          -e @/dev/stdin \
-                          -e db_dump_path=$DB_DUMP_FILE
-                        '''                
+                            cp $VALUES_FILE ./values.yaml
+
+                            if [ ! -f inventory.ini ]; then
+                                echo "Error: inventory.ini not found!"
+                                exit 1
+                            fi
+
+                            ansible-playbook playbooks/update_values.yml \
+                                -i inventory.ini \
+                                -e @$PWD/values.yaml \
+                                -e db_dump_path=$DB_DUMP_FILE
+                        '''              
                     }
                 } 
             }
