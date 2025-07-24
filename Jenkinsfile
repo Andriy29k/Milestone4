@@ -122,14 +122,14 @@ pipeline {
         stage('Ansible inventory generation') {
             steps {
                 dir('ansible') {
-                    sh 'ansible all -i ${INVENTORY} -m ping -vvv' 
+                    sh 'ansible all -i ${INVENTORY} -m ping' 
                 }
             }
         }
 
         stage('Setup K3s Cluster') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'gcp-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'GCP_CREDS_JSON')]) {
                     sh '''
                         ansible-playbook -i ${INVENTORY} ${WORKSPACE}/ansible/site.yml \
                             -e ansible_ssh_common_args='-o StrictHostKeyChecking=no'
