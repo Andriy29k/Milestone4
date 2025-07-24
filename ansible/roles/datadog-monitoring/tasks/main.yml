@@ -18,7 +18,7 @@
 - name: Create Datadog Helm values file
   ansible.builtin.template:
     src: datadog-values.yaml.j2
-    dest: "~/k3s/datadog/datadog-values.yaml"
+    dest: "/home/andriy29k/k3s/datadog/datadog-values.yaml"
     mode: '0644'
 
 - name: Deploy Datadog Helm chart
@@ -28,7 +28,7 @@
       datadog/datadog
       --version {{ chart_version }}
       --namespace {{ datadog_namespace }}
-      --values ~/k3s/datadog/datadog-values.yaml
+      --values /home/andriy29k/k3s/datadog/datadog-values.yaml
       --wait
   changed_when: true
 
