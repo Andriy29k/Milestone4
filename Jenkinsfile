@@ -235,7 +235,7 @@ pipeline {
                             string(credentialsId: 'DATADOG_APP_KEY', variable: 'DATADOG_APP_KEY')]) {
               dir('ansible') {
                 sh '''
-                    ansible-playbook -i inventory.ini playbooks/deploy_datadog.aml
+                    ansible-playbook -i inventory.ini playbooks/deploy_datadog.yml
                 '''
               }
             }
