@@ -231,14 +231,20 @@ pipeline {
             }
         }
 
-        stage('Deploy Datadog Agent') {
+        stage('Deploy Datadog') {
             steps {
-                withCredentials([string(credentialsId: 'DATADOG_API_KEY', variable: 'DATADOG_API_KEY'),
-                                 string(credentialsId: 'DATADOG_APP_KEY', variable: 'DATADOG_APP_KEY')]) {
+                withCredentials([
+                    string(credentialsId: 'DATADOG_API_KEY', variable: 'DD_API_KEY'),
+                    string(credentialsId: 'K8S_NAMESPACE', variable: 'K8S_NAMESPACE')
+                ]) {
                     dir('ansible') {
-                        sh '''
-                            ansible-playbook -i ${INVENTORY} playbooks/deploy_datadog.yml
-                        '''
+                        sh """
+                        ansible-playbook -i inventory.ini playbooks/deploy_datadog.yml \
+                          -e datadog_api_key=${DD_API_KEY} \
+                          -e datadog_namespace=${K8S_NAMESPACE} \
+                          -e datadog_domain=monitoring.class-schedule-app.pp.ua \
+                          -e datadog_site=datadoghq.us5
+                        """
                     }
                 }
             }

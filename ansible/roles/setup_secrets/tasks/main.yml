@@ -32,8 +32,8 @@
 
 - name: Encode TLS cert and key to base64
   set_fact:
-    tls_crt_b64: "{{ tls_crt | b64encode }}"
-    tls_key_b64: "{{ tls_key | b64encode }}"
+    tls_crt_b64: "{{ lookup('file', tls_crt) | b64encode }}"
+    tls_key_b64: "{{ lookup('file', tls_key) | b64encode }}"
 
 - name: Create Docker registry secret YAML from template
   template:

@@ -1,7 +1,7 @@
-datadog_namespace: monitoring
-release_name: datadog
-chart_version: 3.124.0
+datadog_namespace: "datadog"
+datadog_release: "datadog"
 datadog_api_key: "{{ lookup('env', 'DATADOG_API_KEY') }}"
-datadog_app_key: "{{ lookup('env', 'DATADOG_APP_KEY') }}"
-cluster_name: default
-ingress_hostname: monitoring.class-schedule-app.pp.ua
+datadog_site: "datadoghq.us5"
+datadog_domain: "monitoring.class-schedule-app.pp.ua"
+tls_cert_path: "/etc/ssl/certs/tls.crt"
+tls_key_path: "/etc/ssl/private/tls.key"
