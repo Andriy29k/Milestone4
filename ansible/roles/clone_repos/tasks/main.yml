@@ -1,0 +1,39 @@
+- name: Install Git if not present
+  become: true
+  apt:
+    name: git
+    state: present
+    update_cache: yes
+
+- name: Ensure k3s directory exists
+  file:
+    path: "/home/andriy29k/k3s"
+    state: directory
+    mode: '0755'
+
+- name: Copy SSH key to control plane
+  copy:
+    src: "{{ ssh_key_path }}"
+    dest: "~/.ssh/id_rsa"
+    mode: '0600'
+
+- name: Disable StrictHostKeyChecking
+  lineinfile:
+    path: "~/.ssh/config"
+    line: "StrictHostKeyChecking no"
+    create: yes
+    mode: '0600'
+
+- name: Clone or update repositories
+  git:
+    repo: "{{ item.repo }}"
+    dest: "/home/andriy29k/k3s/{{ item.name | lower }}"
+    version: main
+    accept_hostkey: yes
+    update: yes
+    key_file: "~/.ssh/id_rsa"
+  with_items:
+    - { name: "backend",  repo: "{{ github_repo_backend }}" }
+    - { name: "frontend", repo: "{{ github_repo_frontend }}" }
+    - { name: "redis",    repo: "{{ github_repo_redis }}" }
+    - { name: "database", repo: "{{ github_repo_database }}" }

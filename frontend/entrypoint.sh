@@ -1,8 +1,11 @@
 #!/bin/sh
-
-echo "Replacing BACKEND_IP with: ${BACKEND_IP}"
-
-find /usr/share/nginx/html -type f \( -name '*.js' -o -name '*.html' -o -name '*.json' \) -exec \
-    sed -i "s|BACKEND_IP|${BACKEND_IP}|g" {} +
+set -e
+STATIC_FILE=$(find /usr/share/nginx/html/static/js -type f -name "main.*.js" | head -n 1)
+echo "FOUND file: ${STATIC_FILE}"
+if [ -n "${STATIC_FILE}" ] && [ -f "${STATIC_FILE}" ]; then
+    sed -i "s|DOMAIN_TOKEN|${DOMAIN_TOKEN}|g" "${STATIC_FILE}"
+else
+    echo "File main..js not found!"
+fi
 
 exec "$@"

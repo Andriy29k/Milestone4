@@ -1,0 +1,39 @@
+datadog:
+  apiKey: "{{ datadog_api_key }}"
+  site: "{{ datadog_site }}"
+
+clusterAgent:
+  enabled: true
+
+agents:
+  enabled: true
+  containerLogs:
+    enabled: true
+
+logs:
+  enabled: true
+  containerCollectAll: true
+
+processAgent:
+  enabled: true
+
+kubeStateMetricsCore:
+  enabled: true
+
+clusterChecks:
+  enabled: true
+
+datadogClusterAgent:
+  enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: traefik
+    hosts:
+      - host: "{{ datadog_domain }}"
+        paths:
+          - /
+    tls:
+      - secretName: tls-secret
+        hosts:
+          - "{{ datadog_domain }}"

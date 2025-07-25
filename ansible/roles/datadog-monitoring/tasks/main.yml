@@ -1,0 +1,34 @@
+---
+- name: Generate Datadog Helm values file
+  template:
+    src: datadog-values.yaml.j2
+    dest: /tmp/datadog-values.yaml
+
+- name: Add Datadog Helm repo
+  shell: |
+    helm repo add datadog https://helm.datadoghq.com
+    helm repo update
+  args:
+    creates: "/root/.cache/helm/repository/datadog-index.yaml"
+
+- name: Create namespace for Datadog (if not exists)
+  shell: |
+    kubectl get ns {{ datadog_namespace }} || kubectl create ns {{ datadog_namespace }}
+
+- name: Create TLS secret for Ingress
+  shell: |
+    kubectl create secret tls datadog-tls \
+      --cert={{ tls_cert_path }} \
+      --key={{ tls_key_path }} \
+      -n {{ datadog_namespace }} \
+    || echo "Secret already exists"
+  args:
+    executable: /bin/bash
+
+- name: Deploy Datadog via Helm
+  shell: |
+    helm upgrade --install {{ datadog_release }} datadog/datadog \
+      --namespace {{ datadog_namespace }} \
+      --values /tmp/datadog-values.yaml \
+      --create-namespace
+

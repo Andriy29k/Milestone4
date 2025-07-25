@@ -57,7 +57,7 @@ resource "google_compute_firewall" "allow-http" {
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["reverse-proxy"]
+  target_tags   = ["control-plane"]
 }
 
 resource "google_compute_firewall" "internal-allow" {
@@ -66,13 +66,13 @@ resource "google_compute_firewall" "internal-allow" {
 
   allow {
     protocol = "tcp"
-    ports    = ["0-65535"]
+    ports    = ["6443", "80", "443", "22"]
   }
   allow {
     protocol = "udp"
-    ports    = ["0-65535"]
+    ports    = ["8472", "53"]
   }
 
-  source_tags = ["frontend", "backend", "database", "reverse-proxy", "bastion", "monitoring", "control-plane"]
-  target_tags = ["frontend", "backend", "database", "reverse-proxy", "bastion", "monitoring", "control-plane"]
+  source_tags = ["frontend", "backend", "database", "bastion", "monitoring", "control-plane"]
+  target_tags = ["frontend", "backend", "database", "bastion", "monitoring", "control-plane"]
 }

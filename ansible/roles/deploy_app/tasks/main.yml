@@ -1,0 +1,36 @@
+---
+- name: Deploy Database (Postgres)
+  shell: |
+    helm upgrade --install database /home/andriy29k/k3s/database/database \
+      -f /home/andriy29k/k3s/database/database/values.yaml \
+      --namespace {{ namespace }} \
+      --kubeconfig /etc/rancher/k3s/k3s.yaml
+  args:
+    chdir: /home/andriy29k/k3s/database/database
+
+- name: Deploy Redis
+  shell: |
+    helm upgrade --install redis /home/andriy29k/k3s/redis/redis \
+      -f /home/andriy29k/k3s/redis/redis/values.yaml \
+      --namespace {{ namespace }} \
+      --kubeconfig /etc/rancher/k3s/k3s.yaml
+  args:
+    chdir: /home/andriy29k/k3s/redis/redis
+
+- name: Deploy Backend
+  shell: |
+    helm upgrade --install backend /home/andriy29k/k3s/backend/backend \
+      -f /home/andriy29k/k3s/backend/backend/values.yaml \
+      --namespace {{ namespace }} \
+      --kubeconfig /etc/rancher/k3s/k3s.yaml
+  args:
+    chdir: /home/andriy29k/k3s/backend/backend
+
+- name: Deploy Frontend
+  shell: |
+    helm upgrade --install frontend /home/andriy29k/k3s/frontend/frontend \
+      -f /home/andriy29k/k3s/frontend/frontend/values.yaml \
+      --namespace {{ namespace }} \
+      --kubeconfig /etc/rancher/k3s/k3s.yaml
+  args:
+    chdir: /home/andriy29k/k3s/frontend/frontend

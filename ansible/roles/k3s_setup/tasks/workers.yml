@@ -1,0 +1,17 @@
+- name: Read K3s token from control plane
+  slurp:
+    src: /tmp/k3s_token
+  register: token_file
+  delegate_to: "{{ groups['control_plane_group'][0] }}"
+  run_once: true
+
+- name: Set token fact for workers
+  set_fact:
+    worker_k3s_token: "{{ token_file.content | b64decode }}"
+
+- name: Install K3s agent on workers
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_URL="https://{{ hostvars[groups['control_plane_group'][0]]['ansible_host'] }}:6443" \
+    K3S_TOKEN="{{ worker_k3s_token }}" sh -
+  args:
+    creates: /usr/local/bin/k3s

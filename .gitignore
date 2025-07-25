@@ -8,3 +8,5 @@
 *gcp_creds.json
 *.dump
 *.sql
+*.pem
+*.key

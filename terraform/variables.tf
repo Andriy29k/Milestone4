@@ -68,9 +68,3 @@ variable "ssh_path_to_bastion_private" {
 variable "ssh_path_over_bastion_private" {
   type = string
 }
-
-variable "dns_name" {
-  type        = string
-  description = "The name of the DNS zone"
-
-}

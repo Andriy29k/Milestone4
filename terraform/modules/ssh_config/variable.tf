@@ -2,7 +2,7 @@ variable "bastion_public_ip" {
   type = string
 }
 
-variable "reverse_proxy_ip" {
+variable "control_plane_ip" {
   type = string
 }
 

@@ -1,0 +1,19 @@
+replicaCount: {{ database.replicaCount }}
+
+image:
+  repository: {{ database.image.repository }}
+  tag: "{{ database.image.tag }}"
+
+postgres:
+  db: {{ database.postgres.db }}
+  user: {{ database.postgres.user }}
+  password: {{ database.postgres.password }}
+
+persistence:
+  enabled: {{ database.persistence.enabled }}
+  accessMode: {{ database.persistence.accessMode }}
+  size: {{ database.persistence.size }}
+
+service:
+  type: {{ database.service.type }}
+  port: {{ database.service.port }}

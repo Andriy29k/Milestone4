@@ -1,0 +1,10 @@
+replicaCount: {{ redis.replicaCount }}
+
+image:
+  repository: {{ redis.image.repository }}
+  tag: {{ redis.image.tag }}
+  pullPolicy: {{ redis.image.pullPolicy }}
+
+service:
+  type: {{ redis.service.type }}
+  port: {{ redis.service.port }}

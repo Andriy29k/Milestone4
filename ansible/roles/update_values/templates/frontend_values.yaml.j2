@@ -1,0 +1,23 @@
+replicaCount: {{ frontend.replicaCount }}
+
+image:
+  repository: {{ frontend.image.repository }}
+  tag: {{ frontend.image.tag }}
+  pullPolicy: {{ frontend.image.pullPolicy }}
+
+service:
+  type: {{ frontend.service.type }}
+  port: {{ frontend.service.port }}
+
+env:
+  DOMAIN_TOKEN: {{ frontend.env.DOMAIN_TOKEN }}
+
+ingress:
+  enabled: {{ frontend.ingress.enabled }}
+  host: {{ frontend.ingress.host }}
+  path: {{ frontend.ingress.path }}
+  pathType: {{ frontend.ingress.pathType }}
+  entryPoint: {{ frontend.ingress.entryPoint }}
+  tls:
+    enabled: {{ frontend.ingress.tls.enabled }}
+    secretName: {{ frontend.ingress.tls.secretName }}

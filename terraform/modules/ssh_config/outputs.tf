@@ -18,8 +18,8 @@ output "ssh_config_summary" {
     ],
     [
       {
-        machine = "reverse_proxy"
-        ip      = var.reverse_proxy_ip
+        machine = "control_plane"
+        ip      = var.control_plane_ip
         user    = var.ssh_user
         key     = var.ssh_path_over_bastion_private
       },

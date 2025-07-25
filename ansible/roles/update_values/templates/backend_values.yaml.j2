@@ -1,0 +1,26 @@
+replicaCount: {{ backend.replicaCount }}
+
+image:
+  repository: {{ backend.image.repository }}
+  tag: {{ backend.image.tag }}
+  pullPolicy: {{ backend.image.pullPolicy }}
+
+service:
+  type: {{ backend.service.type }}
+  port: {{ backend.service.port }}
+
+env:
+  DB_ENDPOINT_TOKEN: {{ backend.env.DB_ENDPOINT_TOKEN }}
+  DB_USERNAME_TOKEN: {{ backend.env.DB_USERNAME_TOKEN }}
+  DB_USERPASSWORD_TOKEN: {{ backend.env.DB_USERPASSWORD_TOKEN }}
+  REDIS_URL: {{ backend.env.REDIS_URL }}
+
+ingress:
+  enabled: {{ backend.ingress.enabled }}
+  host: {{ backend.ingress.host }}
+  path: {{ backend.ingress.path }}
+  pathType: {{ backend.ingress.pathType }}
+  entryPoint: {{ backend.ingress.entryPoint }}
+  tls:
+    enabled: {{ backend.ingress.tls.enabled }}
+    secretName: {{ backend.ingress.tls.secretName }}

@@ -1,5 +1,0 @@
----
-- hosts: control-plane_group
-  become: yes
-  roles:
-    - postgres
