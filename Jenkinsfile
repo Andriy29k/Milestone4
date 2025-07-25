@@ -55,6 +55,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build Backend') {
             steps {
                 dir('backend') {
@@ -131,7 +132,7 @@ pipeline {
             steps {
                 dir('ansible') {
                     sh '''
-                        ansible-playbook -i ${INVENTORY} playbooks/setup_k3s.yml
+                        ansible-playbook -i ${INVENTORY} playbooks/k3s_setup.yml
                     '''
                 }
             }
